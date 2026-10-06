@@ -1,0 +1,31 @@
+{
+  "description": "Subagent-only guard for the RAS/HMS text MCP tools and a passive, non-blocking update notice.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__plugin_ras-commander_(ras|hms)-text__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv",
+            "args": ["run", "--no-project", "--quiet", "${CLAUDE_PLUGIN_ROOT}/scripts/subagent_guard.py"],
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv",
+            "args": ["run", "--no-project", "--quiet", "${CLAUDE_PLUGIN_ROOT}/scripts/update_check.py", "${CLAUDE_PLUGIN_DATA}", "${CLAUDE_PLUGIN_ROOT}"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

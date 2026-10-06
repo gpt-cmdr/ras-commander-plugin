@@ -1,0 +1,87 @@
+{
+  "library": "ras-commander",
+  "repository": "https://github.com/gpt-cmdr/ras-commander",
+  "pypi_package": "ras-commander",
+  "mcp_package": "ras-commander-mcp",
+  "version": "0.104.0",
+  "tag": "v0.104.0",
+  "commit": "aa26c9e68c3513638d6079dc4fbb06961d1ce459",
+  "generator": {
+    "path": "scripts/agent_framework/build_plugin.py",
+    "sha256": "6309afa68443c6ffe1e079f82c78ab89d312868d6ad68182a6970a25462beb5c"
+  },
+  "package_json_sha256": "d4720c0deb58fbc90dae11c207914c55ff893cc4bf9b72d182cba3493630d471",
+  "selection": {
+    "library_default": [
+      "ras-commander",
+      "cloud-native-gis",
+      "ras-api-discovery"
+    ],
+    "contribution_slot": [
+      "ras-commander-contributing"
+    ],
+    "contribution_sources": [
+      {
+        "name": "ras-commander-contributing",
+        "ref": "feat/self-healing-contributions",
+        "commit": "eb74fd0df4fd14e7e9c887cbbe6cbfeafc1dd60a",
+        "note": "Pre-merge: gpt-cmdr/ras-commander PR #489. Drop 'ref' once released."
+      }
+    ]
+  },
+  "generated_manifest": {
+    "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+    "name": "ras-commander",
+    "version": "0.1.0",
+    "description": "Coordinate HEC-RAS, API discovery, and cloud-native GIS workflows through current public packages.",
+    "author": {
+      "name": "gpt-cmdr",
+      "url": "https://github.com/gpt-cmdr"
+    },
+    "homepage": "https://rascommander.info/ras/",
+    "repository": "https://github.com/gpt-cmdr/ras-commander",
+    "license": "MIT"
+  },
+  "source_provenance": {
+    "source_repository": "https://github.com/gpt-cmdr/ras-commander",
+    "package_configuration_sha256": "da20f2aeeb1c4bde817ee80b39f8b6c3fe08b2152ca29a36c625c182bcc5c1c7",
+    "files": [
+      {
+        "source": ".claude/skills/cloud-native-gis/SKILL.md",
+        "source_sha256": "36b7676e4bd7ea96c573685edbf08ff2de8fa717fb8c2dfeca58c96a34af9495",
+        "packaged": "skills/cloud-native-gis/SKILL.md",
+        "packaged_sha256": "d632168eb01b147d4795f919e12929c894ac36003a9635b72d32eb98f7c1218e"
+      },
+      {
+        "source": ".claude/skills/ras-api-discovery/SKILL.md",
+        "source_sha256": "4e15413d258a6d109965d5c18c161656cda5e505e11b8fd072f48bc29963ddbc",
+        "packaged": "skills/ras-api-discovery/SKILL.md",
+        "packaged_sha256": "672585d458583511dc4ceec0cdc01719ab2784fb1380e24cdf0570c081e833b5"
+      },
+      {
+        "source": ".claude/skills/ras-commander-contributing/SKILL.md",
+        "source_sha256": "e48083f569c9caf1d761a2d020aa4dea903764c34aab84a729efb6ccbc71284f",
+        "packaged": "skills/ras-commander-contributing/SKILL.md",
+        "packaged_sha256": "ef074705eadf5a2ac21ab6f19b2a1a29acc02ec9893b82b42cd773d15a22bc9e"
+      },
+      {
+        "source": ".claude/skills/ras-commander-contributing/references/contribution-checks.md",
+        "source_sha256": "568fccbf15b979aa8cd0a3440737d6d7dbd73b71bc25fab89d7c075bf3d4a6d3",
+        "packaged": "skills/ras-commander-contributing/references/contribution-checks.md",
+        "packaged_sha256": "568fccbf15b979aa8cd0a3440737d6d7dbd73b71bc25fab89d7c075bf3d4a6d3"
+      },
+      {
+        "source": ".claude/skills/ras-commander/SKILL.md",
+        "source_sha256": "429209faa77ec53ba746ce0ce2505cfa1d27a8ed334e2e1482d6a9c42a44cb33",
+        "packaged": "skills/ras-commander/SKILL.md",
+        "packaged_sha256": "d9c091b8e56ef6615aa44cd6cb8666955876e3528a015385c6a6e548b7b0214f"
+      },
+      {
+        "source": ".claude/skills/ras-commander/references/runtime-and-mcp.md",
+        "source_sha256": "e778defd7b069e0b649ede058f51822fda78e8b5c2bc65f3adcc210a15407315",
+        "packaged": "skills/ras-commander/references/runtime-and-mcp.md",
+        "packaged_sha256": "e778defd7b069e0b649ede058f51822fda78e8b5c2bc65f3adcc210a15407315"
+      }
+    ]
+  }
+}

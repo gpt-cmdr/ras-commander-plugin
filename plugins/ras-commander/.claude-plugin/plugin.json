@@ -1,0 +1,39 @@
+{
+  "name": "ras-commander",
+  "version": "0.1.0",
+  "description": "HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander, with read-only RAS/HMS text MCP servers that only their dedicated subagents may call.",
+  "author": {
+    "name": "gpt-cmdr",
+    "url": "https://github.com/gpt-cmdr"
+  },
+  "homepage": "https://rascommander.info/",
+  "repository": "https://github.com/gpt-cmdr/ras-commander-plugin",
+  "license": "MIT",
+  "keywords": ["hec-ras", "hec-hms", "hydraulics", "hydrology", "gis", "mcp"],
+  "userConfig": {
+    "extra_roots": {
+      "type": "string",
+      "title": "Extra project roots",
+      "description": "Optional additional directories the read-only RAS/HMS text servers may read, besides the current project directory. Separate several paths with the OS path-list separator (';' on Windows, ':' on macOS/Linux) or enter a JSON array. Leave empty to allow only the project directory.",
+      "default": ""
+    }
+  },
+  "mcpServers": {
+    "ras-text": {
+      "command": "uv",
+      "args": ["run", "--no-project", "--quiet", "${CLAUDE_PLUGIN_ROOT}/scripts/launch_text_server.py", "ras"],
+      "env": {
+        "COMMANDER_PROJECT_DIR": "${CLAUDE_PROJECT_DIR}",
+        "COMMANDER_EXTRA_ROOTS": "${user_config.extra_roots}"
+      }
+    },
+    "hms-text": {
+      "command": "uv",
+      "args": ["run", "--no-project", "--quiet", "${CLAUDE_PLUGIN_ROOT}/scripts/launch_text_server.py", "hms"],
+      "env": {
+        "COMMANDER_PROJECT_DIR": "${CLAUDE_PROJECT_DIR}",
+        "COMMANDER_EXTRA_ROOTS": "${user_config.extra_roots}"
+      }
+    }
+  }
+}
