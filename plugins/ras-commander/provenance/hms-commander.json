@@ -23,9 +23,9 @@
     "contribution_sources": [
       {
         "name": "hms-commander-contributing",
-        "ref": "feat/self-healing-contributions",
-        "commit": "d1a7f854e8157f6330c86623e4d7dadd3999d704",
-        "note": "Pre-merge: gpt-cmdr/hms-commander PR #36. Drop 'ref' once released."
+        "ref": "9e9c80938cabeef757978937837973eb717d8491",
+        "commit": "9e9c80938cabeef757978937837973eb717d8491",
+        "note": "gpt-cmdr/hms-commander PR #36 merge commit on main. Drop 'ref' once the skill ships in a library release tag."
       }
     ]
   },

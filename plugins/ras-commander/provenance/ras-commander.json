@@ -23,9 +23,9 @@
     "contribution_sources": [
       {
         "name": "ras-commander-contributing",
-        "ref": "feat/self-healing-contributions",
-        "commit": "eb74fd0df4fd14e7e9c887cbbe6cbfeafc1dd60a",
-        "note": "Pre-merge: gpt-cmdr/ras-commander PR #489. Drop 'ref' once released."
+        "ref": "f9e2fefc5938063505d81fe6564b103c5acc446d",
+        "commit": "f9e2fefc5938063505d81fe6564b103c5acc446d",
+        "note": "gpt-cmdr/ras-commander PR #489 merge commit on main. Drop 'ref' once the skill ships in a library release tag."
       }
     ]
   },

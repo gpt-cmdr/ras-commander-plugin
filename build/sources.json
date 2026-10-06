@@ -11,8 +11,8 @@
       "contribution_skills": [
         {
           "name": "ras-commander-contributing",
-          "ref": "feat/self-healing-contributions",
-          "note": "Pre-merge: gpt-cmdr/ras-commander PR #489. Drop 'ref' once released."
+          "ref": "f9e2fefc5938063505d81fe6564b103c5acc446d",
+          "note": "gpt-cmdr/ras-commander PR #489 merge commit on main. Drop 'ref' once the skill ships in a library release tag."
         }
       ]
     },
@@ -26,8 +26,8 @@
       "contribution_skills": [
         {
           "name": "hms-commander-contributing",
-          "ref": "feat/self-healing-contributions",
-          "note": "Pre-merge: gpt-cmdr/hms-commander PR #36. Drop 'ref' once released."
+          "ref": "9e9c80938cabeef757978937837973eb717d8491",
+          "note": "gpt-cmdr/hms-commander PR #36 merge commit on main. Drop 'ref' once the skill ships in a library release tag."
         }
       ]
     }

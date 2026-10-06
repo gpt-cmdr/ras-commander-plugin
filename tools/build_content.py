@@ -90,8 +90,15 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
             # of the same repository. Links outside the directory must resolve
             # in the release checkout or the library generator fails.
             branch = workdir / f"slot-{library['id']}-{name}"
-            run(["git", "-c", "advice.detachedHead=false", "clone", "--quiet", "--depth", "1",
-                 "--branch", ref, "--filter=blob:none", override or library["repository"], str(branch)])
+            url = override or library["repository"]
+            if re.fullmatch(r"[0-9a-f]{40}", ref):
+                # An exact commit: `clone --branch` accepts only branches and tags.
+                run(["git", "init", "--quiet", str(branch)])
+                run(["git", "-C", str(branch), "fetch", "--quiet", "--depth", "1", "--filter=blob:none", url, ref])
+                run(["git", "-C", str(branch), "-c", "advice.detachedHead=false", "checkout", "--quiet", "FETCH_HEAD"])
+            else:
+                run(["git", "-c", "advice.detachedHead=false", "clone", "--quiet", "--depth", "1",
+                     "--branch", ref, "--filter=blob:none", url, str(branch)])
             source_dir = branch / ".claude" / "skills" / name
             if not (source_dir / "SKILL.md").is_file():
                 raise SystemExit(f"{library['id']} {ref}: contribution skill '{name}' not found")
