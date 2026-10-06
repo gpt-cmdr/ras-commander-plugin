@@ -1,0 +1,20 @@
+{
+  "name": "ras-commander-plugin",
+  "interface": {
+    "displayName": "RAS Commander"
+  },
+  "plugins": [
+    {
+      "name": "ras-commander",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ras-commander"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    }
+  ]
+}

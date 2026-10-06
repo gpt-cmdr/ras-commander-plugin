@@ -1,0 +1,33 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ras-commander",
+  "version": "0.1.0",
+  "description": "HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander. Skills only on Codex: the read-only RAS/HMS text MCP servers ship in the Claude Code plugin, and project reads on Codex go through the public Python APIs.",
+  "author": {
+    "name": "gpt-cmdr",
+    "url": "https://github.com/gpt-cmdr"
+  },
+  "homepage": "https://rascommander.info/",
+  "repository": "https://github.com/gpt-cmdr/ras-commander-plugin",
+  "license": "MIT",
+  "keywords": [
+    "hec-ras",
+    "hec-hms",
+    "hydraulics",
+    "hydrology",
+    "gis"
+  ],
+  "extensions": {
+    "com.openai": {
+      "hooks": [],
+      "interface": {
+        "displayName": "RAS Commander",
+        "shortDescription": "HEC-RAS, HEC-HMS, and cloud-native GIS skills",
+        "longDescription": "HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander. Skills only on Codex: the read-only RAS/HMS text MCP servers ship in the Claude Code plugin, and project reads on Codex go through the public Python APIs.",
+        "developerName": "gpt-cmdr",
+        "category": "Engineering",
+        "websiteURL": "https://rascommander.info/"
+      }
+    }
+  }
+}
