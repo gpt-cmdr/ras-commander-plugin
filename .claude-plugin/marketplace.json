@@ -1,0 +1,20 @@
+{
+  "name": "ras-commander-plugin",
+  "owner": {
+    "name": "gpt-cmdr",
+    "url": "https://github.com/gpt-cmdr"
+  },
+  "metadata": {
+    "description": "RAS Commander and HMS Commander for Claude Code: canonical skills plus subagent-only, read-only HEC-RAS/HEC-HMS text MCP servers."
+  },
+  "plugins": [
+    {
+      "name": "ras-commander",
+      "source": "./plugins/ras-commander",
+      "description": "HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander, with read-only RAS/HMS text MCP servers that only their dedicated subagents may call.",
+      "category": "engineering",
+      "homepage": "https://rascommander.info/",
+      "keywords": ["hec-ras", "hec-hms", "hydraulics", "hydrology", "gis", "mcp"]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "library": "hms-commander",
+  "repository": "https://github.com/gpt-cmdr/hms-commander",
+  "pypi_package": "hms-commander",
+  "mcp_package": "hms-commander-mcp",
+  "version": "0.4.0",
+  "tag": "v0.4.0",
+  "commit": "3b80c198af0a2949dd66d6a680aa6fd1e38f0fc3",
+  "generator": {
+    "path": "scripts/agent_framework/build_plugin.py",
+    "sha256": "6309afa68443c6ffe1e079f82c78ab89d312868d6ad68182a6970a25462beb5c"
+  },
+  "package_json_sha256": "3f172f70bb3bc174609b4b4fa713170b7cdd5b8ae1daff419a3b3e075c4a53a3",
+  "selection": {
+    "library_default": [
+      "hms-commander",
+      "hms-ras-integration",
+      "hms-cloud-native-gis"
+    ],
+    "contribution_slot": [
+      "hms-commander-contributing"
+    ],
+    "contribution_sources": [
+      {
+        "name": "hms-commander-contributing",
+        "ref": "9e9c80938cabeef757978937837973eb717d8491",
+        "commit": "9e9c80938cabeef757978937837973eb717d8491",
+        "note": "gpt-cmdr/hms-commander PR #36 merge commit on main. Drop 'ref' once the skill ships in a library release tag."
+      }
+    ]
+  },
+  "generated_manifest": {
+    "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+    "name": "hms-commander",
+    "version": "0.1.0",
+    "description": "Coordinate HEC-HMS and watershed-to-RAS workflows through current public packages.",
+    "author": {
+      "name": "gpt-cmdr",
+      "url": "https://github.com/gpt-cmdr"
+    },
+    "homepage": "https://rascommander.info/hms/",
+    "repository": "https://github.com/gpt-cmdr/hms-commander",
+    "license": "MIT"
+  },
+  "source_provenance": {
+    "source_repository": "https://github.com/gpt-cmdr/hms-commander",
+    "package_configuration_sha256": "8e24bd3d9a03d774d5dfc79af4b28f19b7afd48302ff5654e49c30b61c936db7",
+    "files": [
+      {
+        "source": ".claude/skills/hms-cloud-native-gis/SKILL.md",
+        "source_sha256": "d7c6e5c3b558f983c09db6bc27dbb9134675c0efd6571815db8232922f261f3c",
+        "packaged": "skills/hms-cloud-native-gis/SKILL.md",
+        "packaged_sha256": "74727d6c3279576027791aac3da6647671d9479285a95523f723617a3bc49676"
+      },
+      {
+        "source": ".claude/skills/hms-commander-contributing/SKILL.md",
+        "source_sha256": "d263824d6a547bc893f5eea0054b9cee160d6aafc4178ff9866bf2b70cbe206d",
+        "packaged": "skills/hms-commander-contributing/SKILL.md",
+        "packaged_sha256": "c23ea27c5d41321ac99e4e36a7a28a86cdada805acc9259f5ec7ce18e5a7b444"
+      },
+      {
+        "source": ".claude/skills/hms-commander-contributing/references/contribution-checks.md",
+        "source_sha256": "41aa0c76b662e5e62c0d3668ccb48fa5bd2427f181db8ea69add5376938cbb96",
+        "packaged": "skills/hms-commander-contributing/references/contribution-checks.md",
+        "packaged_sha256": "41aa0c76b662e5e62c0d3668ccb48fa5bd2427f181db8ea69add5376938cbb96"
+      },
+      {
+        "source": ".claude/skills/hms-commander/SKILL.md",
+        "source_sha256": "5819588ebe11443d85f44528121036a326d31f182675b36e227b273b4bfe4632",
+        "packaged": "skills/hms-commander/SKILL.md",
+        "packaged_sha256": "ff396b462e101d5e6b66bc7dce18c16360e98ffb0d3ade05810b8e4dcbb0c2b5"
+      },
+      {
+        "source": ".claude/skills/hms-ras-integration/SKILL.md",
+        "source_sha256": "000b7d8519d1f108e152ef66f4b3169ec32ca03cf9ab7cfa1a5a8433a41d39e4",
+        "packaged": "skills/hms-ras-integration/SKILL.md",
+        "packaged_sha256": "ca0a81c3a31c6e8a5f3f14c4b38978869820c029e660dc1d8e1d54ccd4175aab"
+      }
+    ]
+  }
+}

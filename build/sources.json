@@ -1,0 +1,35 @@
+{
+  "plugin_dir": "plugins/ras-commander",
+  "libraries": [
+    {
+      "id": "ras-commander",
+      "repository": "https://github.com/gpt-cmdr/ras-commander",
+      "pypi_package": "ras-commander",
+      "mcp_package": "ras-commander-mcp",
+      "tag_template": "v{version}",
+      "version": "0.104.0",
+      "contribution_skills": [
+        {
+          "name": "ras-commander-contributing",
+          "ref": "f9e2fefc5938063505d81fe6564b103c5acc446d",
+          "note": "gpt-cmdr/ras-commander PR #489 merge commit on main. Drop 'ref' once the skill ships in a library release tag."
+        }
+      ]
+    },
+    {
+      "id": "hms-commander",
+      "repository": "https://github.com/gpt-cmdr/hms-commander",
+      "pypi_package": "hms-commander",
+      "mcp_package": "hms-commander-mcp",
+      "tag_template": "v{version}",
+      "version": "0.4.0",
+      "contribution_skills": [
+        {
+          "name": "hms-commander-contributing",
+          "ref": "9e9c80938cabeef757978937837973eb717d8491",
+          "note": "gpt-cmdr/hms-commander PR #36 merge commit on main. Drop 'ref' once the skill ships in a library release tag."
+        }
+      ]
+    }
+  ]
+}
