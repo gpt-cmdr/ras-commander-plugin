@@ -4,7 +4,10 @@
 Checks manifest JSON and required fields, component wiring (MCP servers, one
 read-only subagent per server, the subagent-only guard), runtime scripts
 (standard library only, compile on this Python), skill frontmatter, and that
-every generated file matches the recorded build provenance. CI cannot run
+every generated file matches the recorded build provenance. It also checks the
+Codex distribution: the derived ``.agents/plugins/marketplace.json`` and root
+portable ``plugin.json`` are current, follow the Agent Plugins 1.0 manifest
+schema, and wire no MCP servers or hooks into Codex. CI cannot run
 ``claude plugin validate``; maintainers run it locally as well.
 """
 from __future__ import annotations
@@ -17,6 +20,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+import build_content  # noqa: E402  (derives the expected Codex manifests)
+
 MARKETPLACE_NAME = "ras-commander-plugin"
 PLUGIN_NAME = "ras-commander"
 SERVERS = {"ras-text": "ras", "hms-text": "hms"}
@@ -189,6 +195,41 @@ def validate_generated(plugin: Path) -> None:
         check(fields.get("name") == skill and bool(fields.get("description")), f"skills/{skill} frontmatter")
 
 
+AGENT_PLUGINS_KEYS = {"$schema", "name", "version", "description", "author", "homepage",
+                      "repository", "license", "keywords", "extensions"}
+AGENT_PLUGINS_NAME = r"(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?"
+
+
+def validate_codex(plugin: Path) -> None:
+    stale = build_content.stale_codex_manifests(plugin)
+    check(not stale, f"Codex manifests are stale (run tools/build_content.py --codex-only): {stale}")
+    marketplace = load_json(ROOT / ".agents" / "plugins" / "marketplace.json")
+    manifest = load_json(plugin / "plugin.json")
+    if not marketplace or not manifest:
+        return
+    check(marketplace.get("name") == MARKETPLACE_NAME, "Codex marketplace name must be ras-commander-plugin")
+    entries = marketplace.get("plugins", [])
+    check(len(entries) == 1 and entries[0].get("name") == PLUGIN_NAME, "Codex marketplace lists one ras-commander")
+    for entry in entries:
+        source = entry.get("source") or {}
+        check(source.get("source") == "local" and (ROOT / source.get("path", "")).resolve() == plugin,
+              "Codex marketplace source must be the same local plugin directory")
+        policy = entry.get("policy") or {}
+        check(bool(policy.get("installation")) and bool(policy.get("authentication")) and bool(entry.get("category")),
+              "Codex marketplace entry needs policy.installation, policy.authentication, and category")
+    check(manifest.get("$schema") == build_content.AGENT_PLUGINS_SCHEMA, "plugin.json $schema")
+    check(set(manifest) <= AGENT_PLUGINS_KEYS, f"plugin.json has non-schema keys {sorted(set(manifest) - AGENT_PLUGINS_KEYS)}")
+    check(bool(re.fullmatch(AGENT_PLUGINS_NAME, manifest.get("name", ""))) and manifest.get("name") == PLUGIN_NAME,
+          "plugin.json name")
+    claude = load_json(plugin / ".claude-plugin" / "plugin.json") or {}
+    check(manifest.get("version") == claude.get("version"), "Codex and Claude plugin versions differ")
+    openai = (manifest.get("extensions") or {}).get("com.openai") or {}
+    check(openai.get("hooks") == [], "Codex must not load the Claude hooks: extensions.com.openai.hooks must be []")
+    check(not {"apps", "mcpServers"} & set(openai), "Codex manifest must not wire MCP servers or apps")
+    for name in ("mcp.json", ".mcp.json", ".app.json", ".codex-plugin"):
+        check(not (plugin / name).exists(), f"{name} would expose components to Codex; Codex is skills-only")
+
+
 def main() -> int:
     plugin = validate_marketplace()
     if plugin:
@@ -197,10 +238,11 @@ def main() -> int:
         validate_hooks(plugin)
         validate_scripts(plugin)
         validate_generated(plugin)
+        validate_codex(plugin)
     if errors:
         print("Validation failed:\n  " + "\n  ".join(errors))
         return 1
-    print("Marketplace and plugin structure valid.")
+    print("Marketplace and plugin structure valid (Claude Code and Codex).")
     return 0
 
 

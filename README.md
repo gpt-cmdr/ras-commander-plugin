@@ -1,6 +1,6 @@
-# RAS Commander plugin for Claude Code
+# RAS Commander plugin for Claude Code and Codex
 
-A Claude Code plugin marketplace with one plugin, `ras-commander`. It bundles:
+A plugin marketplace for Claude Code and Codex with one plugin, `ras-commander`. It bundles:
 
 - **Skills** from [RAS Commander](https://github.com/gpt-cmdr/ras-commander) and
   [HMS Commander](https://github.com/gpt-cmdr/hms-commander): the RAS and HMS
@@ -40,6 +40,23 @@ Restart Claude Code after installing.
 Installing does not write to `~/.claude/agents`, your project folders, or any
 Python environment. On first use, `uvx` downloads the MCP servers into uv's
 cache.
+
+### Codex
+
+The same plugin is published for Codex from the same generated skills. Codex gets the skills
+only: subagent-only MCP access has not been demonstrated on Codex, so the RAS and HMS text MCP
+servers, subagents and hooks are not wired in. On Codex, project reads go through the
+`ras-commander` and `hms-commander` Python APIs.
+
+```sh
+codex plugin marketplace add gpt-cmdr/ras-commander-plugin
+codex plugin add ras-commander@ras-commander-plugin
+```
+
+To update, run `codex plugin marketplace upgrade ras-commander-plugin`, then
+`codex plugin add ras-commander@ras-commander-plugin` again, and start a new Codex session.
+The Codex marketplace manifest is `.agents/plugins/marketplace.json`; the portable plugin
+manifest is `plugins/ras-commander/plugin.json`.
 
 ## Allowed project roots
 

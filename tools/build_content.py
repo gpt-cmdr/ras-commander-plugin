@@ -9,6 +9,15 @@ generator driven by ``.claude/plugin/package.json``), and merges the generated
 (tag, commit, generator hash, selection, per-file source/packaged SHA-256) is
 written to ``plugins/ras-commander/provenance/``.
 
+The Codex distribution is derived, not copied: the portable Agent Plugins root
+manifest ``plugins/ras-commander/plugin.json`` and the Codex marketplace
+``.agents/plugins/marketplace.json`` are generated from the Claude manifests by
+``codex_manifests()``. Codex installs the same plugin directory and discovers
+the same generated ``skills/``. The Codex manifests declare no MCP servers and
+set ``extensions.com.openai.hooks`` to an empty list, so Codex loads neither the
+RAS/HMS text servers (subagent-only exposure is unqualified on Codex) nor the
+Claude-specific hooks. ``--check`` also fails if these manifests are stale.
+
 Contribution/self-healing skill slot: list skills in a library's
 ``contribution_skills`` array in ``build/sources.json``, either as a name (taken
 from the release tag) or as ``{"name": ..., "ref": "<branch-or-tag>"}`` to take
@@ -24,6 +33,7 @@ Usage:
   python tools/build_content.py                 # rebuild from pinned versions
   python tools/build_content.py --check         # fail if committed content differs
   python tools/build_content.py --latest --bump-on-change   # follow PyPI latest
+  python tools/build_content.py --codex-only [--check]      # Codex manifests only
 """
 from __future__ import annotations
 
@@ -43,6 +53,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "build" / "sources.json"
 GENERATED = ("skills", "resources", "provenance")
+CLAUDE_MARKETPLACE = ROOT / ".claude-plugin" / "marketplace.json"
+CODEX_MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
+AGENT_PLUGINS_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
+CODEX_DESCRIPTION = ("HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander. "
+                     "Skills only on Codex: the read-only RAS/HMS text MCP servers ship in the Claude Code "
+                     "plugin, and project reads on Codex go through the public Python APIs.")
 
 
 def sha256(path: Path) -> str:
@@ -179,6 +195,67 @@ def tree(base: Path) -> dict[str, str]:
     return result
 
 
+def dumps(data: dict) -> str:
+    return json.dumps(data, indent=2) + "\n"
+
+
+def codex_manifests(plugin_dir: Path) -> dict[Path, str]:
+    """Derive the Codex manifests from the Claude manifests (single source of truth).
+
+    Returns ``{path: expected file text}``. Identity, version, and metadata come
+    from ``.claude-plugin/plugin.json`` and ``.claude-plugin/marketplace.json``.
+    MCP servers, userConfig, agents, and hooks are deliberately not carried over.
+    """
+    claude = json.loads((plugin_dir / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    market = json.loads(CLAUDE_MARKETPLACE.read_text(encoding="utf-8"))
+    entry = next(p for p in market["plugins"] if p["name"] == claude["name"])
+    manifest = {"$schema": AGENT_PLUGINS_SCHEMA}
+    for key in ("name", "version"):
+        manifest[key] = claude[key]
+    manifest["description"] = CODEX_DESCRIPTION
+    for key in ("author", "homepage", "repository", "license"):
+        if key in claude:
+            manifest[key] = claude[key]
+    manifest["keywords"] = [k for k in claude.get("keywords", []) if k != "mcp"]
+    manifest["extensions"] = {"com.openai": {
+        # An explicit empty list replaces default hooks/hooks.json discovery,
+        # which holds the Claude-only subagent guard and update notice.
+        "hooks": [],
+        "interface": {
+            "displayName": "RAS Commander",
+            "shortDescription": "HEC-RAS, HEC-HMS, and cloud-native GIS skills",
+            "longDescription": CODEX_DESCRIPTION,
+            "developerName": claude.get("author", {}).get("name", ""),
+            "category": "Engineering",
+            "websiteURL": claude.get("homepage", ""),
+        },
+    }}
+    marketplace = {
+        "name": market["name"],
+        "interface": {"displayName": "RAS Commander"},
+        "plugins": [{
+            "name": claude["name"],
+            "source": {"source": "local", "path": entry["source"]},
+            "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+            "category": "Engineering",
+        }],
+    }
+    return {plugin_dir / "plugin.json": dumps(manifest), CODEX_MARKETPLACE: dumps(marketplace)}
+
+
+def stale_codex_manifests(plugin_dir: Path) -> list[str]:
+    return [path.relative_to(ROOT).as_posix() for path, text in codex_manifests(plugin_dir).items()
+            if not path.is_file() or path.read_text(encoding="utf-8") != text]
+
+
+def write_codex_manifests(plugin_dir: Path) -> list[str]:
+    stale = stale_codex_manifests(plugin_dir)
+    for path, text in codex_manifests(plugin_dir).items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8", newline="\n")
+    return stale
+
+
 def bump_patch(manifest_path: Path) -> str:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     major, minor, patch = (int(x) for x in re.match(r"^(\d+)\.(\d+)\.(\d+)", manifest["version"]).groups())
@@ -192,6 +269,8 @@ def main() -> int:
     parser.add_argument("--latest", action="store_true", help="use each library's latest PyPI release")
     parser.add_argument("--check", action="store_true", help="exit 1 if committed content differs")
     parser.add_argument("--bump-on-change", action="store_true", help="bump the plugin patch version on change")
+    parser.add_argument("--codex-only", action="store_true",
+                        help="only (re)write or --check the derived Codex manifests; no library clones")
     parser.add_argument("--repo-override", action="append", default=[], metavar="ID=URL",
                         help="clone a library from another URL/path (testing)")
     arguments = parser.parse_args()
@@ -202,15 +281,26 @@ def main() -> int:
         for library in sources["libraries"]:
             library["version"] = pypi_latest(library["pypi_package"])
     plugin_dir = ROOT / sources["plugin_dir"]
+    if arguments.codex_only:
+        if arguments.check:
+            stale = stale_codex_manifests(plugin_dir)
+            if stale:
+                print("Codex manifests are stale; run tools/build_content.py --codex-only:\n  " + "\n  ".join(stale))
+                return 1
+            print("Codex manifests match the Claude manifests.")
+            return 0
+        print("Rewrote Codex manifests:", ", ".join(write_codex_manifests(plugin_dir)) or "already current")
+        return 0
     with tempfile.TemporaryDirectory(prefix="ras-commander-plugin-build-") as temporary:
         staging = assemble(sources["libraries"], Path(temporary), overrides)
         before, after = tree(plugin_dir), tree(staging)
         changed = sorted(set(before) ^ set(after) | {k for k in before.keys() & after.keys() if before[k] != after[k]})
         if arguments.check:
+            changed += stale_codex_manifests(plugin_dir)
             if changed:
                 print("Generated content differs from library sources:\n  " + "\n  ".join(changed))
                 return 1
-            print("Generated content matches library release sources.")
+            print("Generated content matches library release sources; Codex manifests are current.")
             return 0
         for name in GENERATED:
             shutil.rmtree(plugin_dir / name, ignore_errors=True)
@@ -222,6 +312,9 @@ def main() -> int:
         print(f"Updated {len(changed)} generated file(s).")
         if arguments.bump_on_change:
             print("Plugin version:", bump_patch(plugin_dir / ".claude-plugin" / "plugin.json"))
+    codex_stale = write_codex_manifests(plugin_dir)
+    if codex_stale:
+        print("Rewrote Codex manifests:", ", ".join(codex_stale))
     else:
         print("No generated content changes.")
     if "GITHUB_OUTPUT" in os.environ:
