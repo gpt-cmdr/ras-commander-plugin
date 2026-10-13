@@ -137,7 +137,12 @@ def validate_hooks(plugin: Path) -> None:
                     if arg.startswith("${CLAUDE_PLUGIN_ROOT}/"):
                         target = plugin / arg.split("/", 1)[1]
                         check(target.is_file(), f"{event}: missing {target.relative_to(ROOT)}")
-    check(bool((hooks.get("hooks") or {}).get("SessionStart")), "SessionStart update notice missing")
+    session = (hooks.get("hooks") or {}).get("SessionStart") or []
+    check(bool(session), "SessionStart update notice missing")
+    check(any(hook.get("args", [])[-2:] == ["${CLAUDE_PLUGIN_ROOT}/scripts/subagent_guard.py", "--session-context"]
+              and re.fullmatch(entry.get("matcher", ".*"), "compact")
+              for entry in session for hook in entry.get("hooks", [])),
+          "SessionStart delegation hint missing (subagent_guard.py --session-context on every session source)")
 
 
 def validate_scripts(plugin: Path) -> None:
