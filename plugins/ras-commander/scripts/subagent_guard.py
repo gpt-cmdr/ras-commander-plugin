@@ -4,6 +4,10 @@ Claude Code registers plugin MCP tools in the main session too. This hook denies
 any call that does not come from the matching plugin subagent. Hook input has
 ``agent_id``/``agent_type`` only when the call originates inside a subagent.
 
+With ``--session-context`` (SessionStart hook), print one short context line
+that tells the main conversation to delegate, so it does not try the tools
+directly and collect guard denials first.
+
 Standard library only; runs through ``uv run --no-project`` on Windows, macOS,
 and Linux. Fails closed for this plugin's tools if the input cannot be parsed.
 """
@@ -15,6 +19,13 @@ import sys
 
 PLUGIN = "ras-commander"
 TOOL = re.compile(r"^mcp__plugin_ras-commander_(ras-text|hms-text)__")
+SESSION_CONTEXT = (
+    "ras-commander plugin: the mcp__plugin_ras-commander_ras-text__* and "
+    "mcp__plugin_ras-commander_hms-text__* tools are subagent-only, and a guard hook denies "
+    "calls from the main conversation. For a HEC-RAS text lookup (units, project metadata, "
+    "plan description or configuration), use the Agent tool with "
+    "subagent_type 'ras-commander:ras-text'; for HEC-HMS text, 'ras-commander:hms-text'. "
+    "Use the ras-commander or hms-commander Python API for results, geometry, execution, and edits.")
 
 
 def decide(event: dict) -> str | None:
@@ -26,8 +37,8 @@ def decide(event: dict) -> str | None:
     subagent = f"{PLUGIN}:{server}"
     if not event.get("agent_id"):
         return (f"The {server} MCP tools run only inside the {subagent} subagent. "
-                f"Delegate one bounded read-only question to the {subagent} subagent "
-                "with the Agent tool instead of calling the tool directly.")
+                f"Delegate one bounded read-only question with the Agent tool "
+                f"(subagent_type '{subagent}') instead of calling the tool directly.")
     agent_type = event.get("agent_type")
     if agent_type and agent_type not in (subagent, server):
         return (f"The {server} MCP tools are reserved for the {subagent} subagent; "
@@ -35,7 +46,16 @@ def decide(event: dict) -> str | None:
     return None
 
 
+def session_context() -> str:
+    return json.dumps({"hookSpecificOutput": {
+        "hookEventName": "SessionStart",
+        "additionalContext": SESSION_CONTEXT}})
+
+
 def main() -> int:
+    if sys.argv[1:] == ["--session-context"]:
+        print(session_context())
+        return 0
     try:
         event = json.loads(sys.stdin.read() or "{}")
         if not isinstance(event, dict):

@@ -15,7 +15,9 @@ A plugin marketplace for Claude Code and Codex with one plugin, `ras-commander`.
   `ras-commander:hms-text`. Each one can use only its own server's tools.
 - **A guard hook.** Calls to either server are allowed only from inside the
   matching subagent. A direct call from the main conversation is denied, with a
-  message that says to delegate to the subagent instead.
+  message that says to delegate to the subagent instead. A one-line
+  session-start context hint tells the main conversation to delegate from the
+  start, so it does not try the tools first.
 - **A passive update notice**, described in [Updates](#updates).
 
 ## Requirements
@@ -32,6 +34,12 @@ A plugin marketplace for Claude Code and Codex with one plugin, `ras-commander`.
 claude plugin marketplace add gpt-cmdr/ras-commander-plugin
 claude plugin install ras-commander@ras-commander-plugin
 ```
+
+The shell install prints `1 userConfig option not yet set — run /plugin
+configure … or pass --config KEY=VALUE.` This is expected and can be ignored: it
+refers to the optional `extra_roots` setting described in
+[Allowed project roots](#allowed-project-roots). Claude Code prints it for every
+unset option, including optional ones with a default.
 
 You can also run `/plugin marketplace add gpt-cmdr/ras-commander-plugin` and
 then `/plugin install ras-commander@ras-commander-plugin` inside Claude Code.
@@ -173,7 +181,7 @@ Restart Claude Code to apply the update.
 plugins/ras-commander/
   .claude-plugin/plugin.json        manifest, MCP servers, userConfig
   agents/{ras-text,hms-text}.md     read-only subagents (one per server)
-  hooks/hooks.json                  PreToolUse guard and SessionStart update notice
+  hooks/hooks.json                  PreToolUse guard, SessionStart delegation hint and update notice
   scripts/                          launcher, guard, update check (stdlib Python)
   skills/                           GENERATED from library releases (do not edit)
   provenance/                       tags, commits, generator hashes, file hashes

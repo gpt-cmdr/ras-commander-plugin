@@ -60,6 +60,20 @@ class GuardTests(unittest.TestCase):
                                          "agent_type": "ras-commander:ras-text"})), "")
         self.assertIn("deny", run("not json"))
 
+    def test_session_context(self):
+        result = subprocess.run([sys.executable, str(SCRIPTS / "subagent_guard.py"), "--session-context"],
+                                input="", capture_output=True, text=True, timeout=30)
+        output = json.loads(result.stdout)["hookSpecificOutput"]
+        self.assertEqual(output["hookEventName"], "SessionStart")
+        context = output["additionalContext"]
+        for text in ("subagent_type 'ras-commander:ras-text'", "'ras-commander:hms-text'",
+                     "mcp__plugin_ras-commander_ras-text__*", "guard hook denies"):
+            self.assertIn(text, context)
+        self.assertLess(len(context), 1000)
+
+    def test_denial_names_agent_call(self):
+        self.assertIn("subagent_type 'ras-commander:ras-text'", guard.decide({"tool_name": RAS_TOOL}))
+
 
 class LauncherTests(unittest.TestCase):
     def test_roots(self):
@@ -137,6 +151,9 @@ class UpdateTests(unittest.TestCase):
                                 input=json.dumps({"tool_name": HMS_TOOL}), capture_output=True, text=True,
                                 timeout=60)
         self.assertEqual(json.loads(result.stdout)["hookSpecificOutput"]["permissionDecision"], "deny")
+        context = subprocess.run(["uv", "run", "--no-project", "--quiet", str(SCRIPTS / "subagent_guard.py"),
+                                  "--session-context"], input="", capture_output=True, text=True, timeout=60)
+        self.assertIn("ras-commander:ras-text", json.loads(context.stdout)["hookSpecificOutput"]["additionalContext"])
 
 
 if __name__ == "__main__":
