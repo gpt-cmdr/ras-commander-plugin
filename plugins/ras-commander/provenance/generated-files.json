@@ -3,7 +3,7 @@
   "files": [
     {
       "path": "skills/cloud-native-gis/SKILL.md",
-      "sha256": "d632168eb01b147d4795f919e12929c894ac36003a9635b72d32eb98f7c1218e",
+      "sha256": "a14913c972e1cf0936559522e6aa7e008889579bd385ecfd89c8fd31f64395a9",
       "library": "ras-commander"
     },
     {
@@ -33,7 +33,7 @@
     },
     {
       "path": "skills/ras-api-discovery/SKILL.md",
-      "sha256": "672585d458583511dc4ceec0cdc01719ab2784fb1380e24cdf0570c081e833b5",
+      "sha256": "56cb77de948fbb1dda33196b2ea09fb7dd0547c8be64774eeed0c5cea361146e",
       "library": "ras-commander"
     },
     {
@@ -48,12 +48,7 @@
     },
     {
       "path": "skills/ras-commander/SKILL.md",
-      "sha256": "d9c091b8e56ef6615aa44cd6cb8666955876e3528a015385c6a6e548b7b0214f",
-      "library": "ras-commander"
-    },
-    {
-      "path": "skills/ras-commander/references/runtime-and-mcp.md",
-      "sha256": "e778defd7b069e0b649ede058f51822fda78e8b5c2bc65f3adcc210a15407315",
+      "sha256": "d2f363bb5ab508f46c6c9612b0c8f4517755ba8748cec2a52c424db995515154",
       "library": "ras-commander"
     }
   ]

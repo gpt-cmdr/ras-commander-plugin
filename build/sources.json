@@ -7,7 +7,7 @@
       "pypi_package": "ras-commander",
       "mcp_package": "ras-commander-mcp",
       "tag_template": "v{version}",
-      "version": "0.104.0",
+      "version": "0.108.1",
       "contribution_skills": [
         {
           "name": "ras-commander-contributing",
