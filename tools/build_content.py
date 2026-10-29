@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Regenerate the plugin's skills from the libraries' own release tags.
+"""Regenerate the plugin's skills from the libraries' tracked branch (``main``).
 
 Skills are never hand-copied. For each library in ``build/sources.json`` this
-script shallow-clones the release tag, runs that release's
+script fetches the pinned ``commit`` of the tracked ``ref`` (``main``), runs that
+commit's
 ``scripts/agent_framework/build_plugin.py`` (the library's canonical skills-only
 generator driven by ``.claude/plugin/package.json``), and merges the generated
 ``skills/`` (and any ``resources/``) into ``plugins/ras-commander/``. Provenance
 (tag, commit, generator hash, selection, per-file source/packaged SHA-256) is
-written to ``plugins/ras-commander/provenance/``.
+written to ``plugins/ras-commander/provenance/``. ``--latest`` moves each pin to
+the current head of its ``ref``; plain builds and ``--check`` use the pinned
+commit, so CI stays reproducible.
 
 The Codex distribution is derived, not copied: the portable Agent Plugins root
 manifest ``plugins/ras-commander/plugin.json`` and the Codex marketplace
@@ -20,19 +23,19 @@ Claude-specific hooks. ``--check`` also fails if these manifests are stale.
 
 Contribution/self-healing skill slot: list skills in a library's
 ``contribution_skills`` array in ``build/sources.json``, either as a name (taken
-from the release tag) or as ``{"name": ..., "ref": "<branch-or-tag>"}`` to take
+from the tracked commit) or as ``{"name": ..., "ref": "<branch-or-tag>"}`` to take
 the skill directory from a pre-merge branch of the same repository. They are
 added to that library's own ``package.json`` selection inside the disposable
 clone, so they go through the same generator, shared-distribution approval,
 link containment, and provenance as every other skill; the ref and commit are
 recorded. A listed skill that cannot be found fails the build. Once the skill
-ships in a release, drop the ``ref``. A slot skill already in the library's
-default selection is skipped.
+is on the tracked branch, drop the ``ref``. A slot skill already in the
+library's default selection is skipped.
 
 Usage:
-  python tools/build_content.py                 # rebuild from pinned versions
+  python tools/build_content.py                 # rebuild from pinned commits
   python tools/build_content.py --check         # fail if committed content differs
-  python tools/build_content.py --latest --bump-on-change   # follow PyPI latest
+  python tools/build_content.py --latest --bump-on-change   # follow the tracked branch head
   python tools/build_content.py --codex-only [--check]      # Codex manifests only
 """
 from __future__ import annotations
@@ -47,7 +50,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,29 +67,42 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def pypi_latest(package: str) -> str:
-    request = urllib.request.Request(f"https://pypi.org/pypi/{package}/json",
-                                     headers={"User-Agent": "ras-commander-plugin-build"})
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return json.load(response)["info"]["version"]
-
-
 def run(command: list[str], **options) -> str:
-    result = subprocess.run(command, check=True, capture_output=True, text=True, **options)
+    # UTF-8 mode: library generators read skill text without an explicit
+    # encoding, which fails on the default Windows code page.
+    environment = {**os.environ, "PYTHONUTF8": "1"}
+    try:
+        result = subprocess.run(command, check=True, capture_output=True, text=True,
+                                encoding="utf-8", env=environment, **options)
+    except subprocess.CalledProcessError as error:
+        raise SystemExit(f"Command failed: {' '.join(command)}\n{error.stderr or error.stdout}") from None
     return result.stdout.strip()
 
 
-def clone(library: dict, destination: Path, override: str | None) -> tuple[str, str]:
-    tag = library["tag_template"].format(version=library["version"])
+def branch_head(library: dict, override: str | None) -> str:
     url = override or library["repository"]
-    run(["git", "-c", "advice.detachedHead=false", "clone", "--quiet", "--depth", "1",
-         "--branch", tag, "--filter=blob:none", url, str(destination)])
-    return tag, run(["git", "-C", str(destination), "rev-parse", "HEAD"])
+    return run(["git", "ls-remote", "--exit-code", url, f"refs/heads/{library['ref']}"]).split()[0]
+
+
+def fetch_commit(url: str, commit: str, destination: Path) -> None:
+    run(["git", "init", "--quiet", str(destination)])
+    # Byte-identical checkouts on every OS; a global autocrlf would change hashes.
+    run(["git", "-C", str(destination), "config", "core.autocrlf", "false"])
+    run(["git", "-C", str(destination), "fetch", "--quiet", "--depth", "1", "--filter=blob:none", url, commit])
+    run(["git", "-C", str(destination), "-c", "advice.detachedHead=false", "checkout", "--quiet", "FETCH_HEAD"])
+
+
+def clone(library: dict, destination: Path, override: str | None) -> tuple[str, str]:
+    fetch_commit(override or library["repository"], library["commit"], destination)
+    commit = run(["git", "-C", str(destination), "rev-parse", "HEAD"])
+    if commit != library["commit"]:
+        raise SystemExit(f"{library['id']}: fetched {commit}, expected {library['commit']}")
+    return library["ref"], commit
 
 
 def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, dict]:
     checkout = workdir / f"src-{library['id']}"
-    tag, commit = clone(library, checkout, override)
+    ref, commit = clone(library, checkout, override)
     package_path = checkout / ".claude" / "plugin" / "package.json"
     original_sha = sha256(package_path)
     package = json.loads(package_path.read_text(encoding="utf-8"))
@@ -96,36 +111,35 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
     slot_sources: list[dict] = []
     for entry in library.get("contribution_skills", []):
         entry = {"name": entry} if isinstance(entry, str) else dict(entry)
-        name, ref = entry["name"], entry.get("ref")
+        name, slot_ref = entry["name"], entry.get("ref")
         if name in default:
             continue
         skill_dir = checkout / ".claude" / "skills" / name
-        origin = {"name": name, "ref": tag, "commit": commit}
-        if ref:
+        origin = {"name": name, "ref": ref, "commit": commit}
+        if slot_ref:
             # Pre-merge slot: take the skill directory from a named branch/tag
             # of the same repository. Links outside the directory must resolve
-            # in the release checkout or the library generator fails.
+            # in the tracked checkout or the library generator fails.
             branch = workdir / f"slot-{library['id']}-{name}"
             url = override or library["repository"]
-            if re.fullmatch(r"[0-9a-f]{40}", ref):
+            if re.fullmatch(r"[0-9a-f]{40}", slot_ref):
                 # An exact commit: `clone --branch` accepts only branches and tags.
-                run(["git", "init", "--quiet", str(branch)])
-                run(["git", "-C", str(branch), "fetch", "--quiet", "--depth", "1", "--filter=blob:none", url, ref])
-                run(["git", "-C", str(branch), "-c", "advice.detachedHead=false", "checkout", "--quiet", "FETCH_HEAD"])
+                fetch_commit(url, slot_ref, branch)
             else:
-                run(["git", "-c", "advice.detachedHead=false", "clone", "--quiet", "--depth", "1",
-                     "--branch", ref, "--filter=blob:none", url, str(branch)])
+                run(["git", "-c", "advice.detachedHead=false", "-c", "core.autocrlf=false", "clone",
+                     "--config", "core.autocrlf=false", "--quiet", "--depth", "1",
+                     "--branch", slot_ref, "--filter=blob:none", url, str(branch)])
             source_dir = branch / ".claude" / "skills" / name
             if not (source_dir / "SKILL.md").is_file():
-                raise SystemExit(f"{library['id']} {ref}: contribution skill '{name}' not found")
+                raise SystemExit(f"{library['id']} {slot_ref}: contribution skill '{name}' not found")
             if skill_dir.exists():
                 shutil.rmtree(skill_dir)
             shutil.copytree(source_dir, skill_dir)
-            origin = {"name": name, "ref": ref,
+            origin = {"name": name, "ref": slot_ref,
                       "commit": run(["git", "-C", str(branch), "rev-parse", "HEAD"]),
                       "note": entry.get("note", "")}
         if not (skill_dir / "SKILL.md").is_file():
-            raise SystemExit(f"{library['id']} {tag}: contribution skill '{name}' is not in this release")
+            raise SystemExit(f"{library['id']} {commit}: contribution skill '{name}' is not on {ref}")
         slot.append(name)
         slot_sources.append(origin)
     if slot:
@@ -139,8 +153,7 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
         "repository": library["repository"],
         "pypi_package": library["pypi_package"],
         "mcp_package": library["mcp_package"],
-        "version": library["version"],
-        "tag": tag,
+        "ref": ref,
         "commit": commit,
         "generator": {"path": "scripts/agent_framework/build_plugin.py", "sha256": sha256(generator)},
         "package_json_sha256": original_sha,
@@ -179,7 +192,7 @@ def assemble(libraries: list[dict], workdir: Path, overrides: dict[str, str]) ->
             json.dumps(record, indent=2) + "\n", encoding="utf-8")
     files.sort(key=lambda item: item["path"])
     (staging / "provenance" / "generated-files.json").write_text(json.dumps({
-        "note": "Generated by tools/build_content.py from library release tags. Do not edit by hand.",
+        "note": "Generated by tools/build_content.py from the libraries' tracked commits. Do not edit by hand.",
         "files": files}, indent=2) + "\n", encoding="utf-8")
     return staging
 
@@ -266,7 +279,7 @@ def bump_patch(manifest_path: Path) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--latest", action="store_true", help="use each library's latest PyPI release")
+    parser.add_argument("--latest", action="store_true", help="pin each library to the head of its tracked ref")
     parser.add_argument("--check", action="store_true", help="exit 1 if committed content differs")
     parser.add_argument("--bump-on-change", action="store_true", help="bump the plugin patch version on change")
     parser.add_argument("--codex-only", action="store_true",
@@ -279,7 +292,7 @@ def main() -> int:
     overrides = dict(item.split("=", 1) for item in arguments.repo_override)
     if arguments.latest:
         for library in sources["libraries"]:
-            library["version"] = pypi_latest(library["pypi_package"])
+            library["commit"] = branch_head(library, overrides.get(library["id"]))
     plugin_dir = ROOT / sources["plugin_dir"]
     if arguments.codex_only:
         if arguments.check:
@@ -298,9 +311,9 @@ def main() -> int:
         if arguments.check:
             changed += stale_codex_manifests(plugin_dir)
             if changed:
-                print("Generated content differs from library sources:\n  " + "\n  ".join(changed))
+                print("Generated content differs from the pinned library commits:\n  " + "\n  ".join(changed))
                 return 1
-            print("Generated content matches library release sources; Codex manifests are current.")
+            print("Generated content matches the pinned library commits; Codex manifests are current.")
             return 0
         for name in GENERATED:
             shutil.rmtree(plugin_dir / name, ignore_errors=True)
@@ -315,7 +328,7 @@ def main() -> int:
     codex_stale = write_codex_manifests(plugin_dir)
     if codex_stale:
         print("Rewrote Codex manifests:", ", ".join(codex_stale))
-    else:
+    elif not changed:
         print("No generated content changes.")
     if "GITHUB_OUTPUT" in os.environ:
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as stream:

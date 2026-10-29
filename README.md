@@ -143,6 +143,19 @@ hms-commander-mcp`. The plugin does not use those copies.
 
 ### Update the plugin (skills, agents, hooks)
 
+The skills track `main` of ras-commander and hms-commander. A scheduled job
+regenerates them every three hours and publishes a new plugin patch version
+whenever they change (see [Maintenance](#maintenance)).
+
+**Turn on auto-update (recommended).** Claude Code auto-updates plugins only
+from marketplaces with auto-update on, and it is off by default for
+third-party marketplaces such as this one. Turn it on once: run `/plugin`, open
+the **Marketplaces** tab, select `ras-commander-plugin`, and choose **Enable
+auto-update**. After that, each session refreshes the marketplace in the
+background, and the next session loads the new version.
+
+To update by hand instead:
+
 ```sh
 claude plugin marketplace update ras-commander-plugin
 claude plugin update ras-commander@ras-commander-plugin
@@ -168,9 +181,10 @@ Restart Claude Code to apply the update.
   servers, subagents, or hooks. On those hosts the skills fall back to the
   public Python APIs or report that a capability is missing. They never call
   project MCP from the main agent.
-- **The skills are snapshots.** They are regenerated from library releases,
-  as described in [Maintenance](#maintenance), and reach you through
-  `claude plugin update`.
+- **The skills follow library `main`, not PyPI releases.** They are regenerated
+  from each library's `main` branch, as described in [Maintenance](#maintenance),
+  and reach you through auto-update or `claude plugin update`. They can
+  describe APIs that `main` has but the latest PyPI release does not yet have.
 - **uv is required.** If `uv` is not on `PATH`, the servers and hooks do not
   start.
 
@@ -183,51 +197,53 @@ plugins/ras-commander/
   agents/{ras-text,hms-text}.md     read-only subagents (one per server)
   hooks/hooks.json                  PreToolUse guard, SessionStart delegation hint and update notice
   scripts/                          launcher, guard, update check (stdlib Python)
-  skills/                           GENERATED from library releases (do not edit)
-  provenance/                       tags, commits, generator hashes, file hashes
-build/sources.json                  library versions and contribution-skill slot
-tools/build_content.py              regenerate skills from library release tags
+  skills/                           GENERATED from library main (do not edit)
+  provenance/                       refs, commits, generator hashes, file hashes
+build/sources.json                  tracked ref, pinned commit, contribution-skill slot
+tools/build_content.py              regenerate skills from the pinned library commits
 tools/validate.py                   offline manifest, structure, and provenance checks
 tools/test_scripts.py               unit tests for the runtime scripts
 ```
 
 ## Maintenance
 
-The skills are never copied by hand. `tools/build_content.py` shallow-clones
-each library's release tag (`v<version>` from `build/sources.json`) and runs
-that release's own `scripts/agent_framework/build_plugin.py`, which selects
-skills through `.claude/plugin/package.json`. The script then merges the
-generated `skills/` into the plugin. It records the tag, commit, generator
-SHA-256, selection, and every source and packaged file hash under
-`plugins/ras-commander/provenance/`.
+The skills are never copied by hand. Each library entry in
+`build/sources.json` names a tracked `ref` (`main`) and a pinned `commit`.
+`tools/build_content.py` fetches that commit and runs its own
+`scripts/agent_framework/build_plugin.py`, which selects skills through
+`.claude/plugin/package.json`. The script then merges the generated `skills/`
+into the plugin. It records the ref, commit, generator SHA-256, selection, and
+every source and packaged file hash under `plugins/ras-commander/provenance/`.
+`--latest` moves each pin to the current head of its ref. Plain builds and
+`--check` use the pinned commit, so CI results are reproducible.
 
 ```sh
-python tools/build_content.py            # rebuild from the pinned versions
+python tools/build_content.py            # rebuild from the pinned commits
 python tools/build_content.py --check    # fail if committed content differs
-python tools/build_content.py --latest --bump-on-change
+python tools/build_content.py --latest --bump-on-change   # follow library main
 python tools/validate.py
 python -m unittest tools/test_scripts.py
 claude plugin validate plugins/ras-commander   # local only
 ```
 
 **Contribution-skill slot.** Each library entry in `build/sources.json` has a
-`contribution_skills` list. A name selects a skill from the release tag. An
+`contribution_skills` list. A name selects a skill from the pinned commit. An
 object `{"name": ..., "ref": "<branch>"}` takes the skill from a pre-merge
 branch. Either way, the skill goes through the library's generator and its
-ref and commit are recorded in provenance. Right now, `ras-commander-contributing`
-and `hms-commander-contributing` come from `feat/self-healing-contributions`
-(ras-commander PR #489 and hms-commander PR #36). Remove the `ref` once those
-skills ship in a release.
+ref and commit are recorded in provenance. A slot skill that is already in
+the library's default selection is skipped, which is now the case for
+`ras-commander-contributing` and `hms-commander-contributing` on `main`.
 
 **CI.** `validate.yml` runs the structure and provenance checks, plus a
 `--check` rebuild from the pinned sources, and runs the script tests on
 Windows, macOS, and Linux. CI cannot run `claude plugin validate`, so run it
-locally before you merge. `regenerate.yml` runs weekly, on manual dispatch,
-or on a `library-release` repository dispatch. It rebuilds from the latest
-PyPI releases, bumps the plugin patch version, and opens a pull request if
-anything changed. That workflow never merges or publishes. Creating the pull
-request requires the repository setting that allows GitHub Actions to create
-pull requests.
+locally before you merge changes to the tools, scripts, or manifests.
+`regenerate.yml` runs every three hours, on manual dispatch, and on a
+`library-release` or `library-main-updated` repository dispatch. It pins each
+library to the head of `main` and rebuilds. If anything changed, it runs the
+structure, provenance, and `--check` validation, bumps the plugin patch
+version, and pushes the commit straight to `main`. If validation fails,
+nothing is pushed and the run fails. It never publishes to PyPI.
 
 ## License
 

@@ -179,10 +179,9 @@ def validate_generated(plugin: Path) -> None:
         provenance = load_json(plugin / "provenance" / f"{library['id']}.json")
         if not provenance:
             continue
-        check(provenance.get("version") == library["version"], f"{library['id']}: provenance version is stale")
-        check(provenance.get("tag") == library["tag_template"].format(version=library["version"]),
-              f"{library['id']}: provenance tag")
-        check(bool(re.fullmatch(r"[0-9a-f]{40}", provenance.get("commit", ""))), f"{library['id']}: commit")
+        check(bool(re.fullmatch(r"[0-9a-f]{40}", library.get("commit", ""))), f"{library['id']}: pinned commit")
+        check(provenance.get("ref") == library.get("ref"), f"{library['id']}: provenance ref")
+        check(provenance.get("commit") == library.get("commit"), f"{library['id']}: provenance commit is stale")
         selection = provenance.get("selection", {})
         wanted = [e if isinstance(e, str) else e["name"] for e in library.get("contribution_skills", [])]
         check(selection.get("contribution_slot") == [s for s in wanted
