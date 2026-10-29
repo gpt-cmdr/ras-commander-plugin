@@ -240,7 +240,8 @@ Windows, macOS, and Linux. CI cannot run `claude plugin validate`, so run it
 locally before you merge changes to the tools, scripts, or manifests.
 `regenerate.yml` runs every three hours, on manual dispatch, and on a
 `library-release` or `library-main-updated` repository dispatch. It pins each
-library to the head of `main` and rebuilds. If anything changed, it runs the
+library to the head of `main` and rebuilds. If no packaged skill or resource
+changed, it keeps the current pins and does nothing. Otherwise it runs the
 structure, provenance, and `--check` validation, bumps the plugin patch
 version, and pushes the commit straight to `main`. If validation fails,
 nothing is pushed and the run fails. It never publishes to PyPI.

@@ -329,6 +329,14 @@ def main() -> int:
                 return 1
             print("Generated content matches the pinned library commits; Codex manifests are current.")
             return 0
+        if arguments.latest and not any(not path.startswith("provenance/") for path in changed):
+            # The branch moved but no packaged file changed: keep the current pins
+            # rather than publishing a plugin version that differs only in provenance.
+            print("No skill or resource changes at the branch heads; keeping the current pins.")
+            if "GITHUB_OUTPUT" in os.environ:
+                with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as stream:
+                    stream.write("changed=false\n")
+            return 0
         for name in GENERATED:
             shutil.rmtree(plugin_dir / name, ignore_errors=True)
             if (staging / name).is_dir():
