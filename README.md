@@ -112,7 +112,7 @@ continue to resolve published PyPI packages, and existing Python environment pin
 are preserved. A release bundle omits optional contribution skills that do not
 exist in the published source tag.
 
-To select **latest** in Claude Code:
+For a new **latest** installation in Claude Code:
 
 ```sh
 claude plugin marketplace add gpt-cmdr/ras-commander-plugin@latest
@@ -120,16 +120,37 @@ claude plugin marketplace update ras-commander-plugin
 claude plugin update ras-commander@ras-commander-plugin
 ```
 
-For Codex:
+For an existing Claude installation, first change this marketplace's source
+`ref` to `latest` in `~/.claude/settings.json` (or the active
+`CLAUDE_CONFIG_DIR/settings.json`). Keep its other settings:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "ras-commander-plugin": {
+      "source": {"source": "github", "repo": "gpt-cmdr/ras-commander-plugin", "ref": "latest"},
+      "autoUpdate": true
+    }
+  }
+}
+```
+
+Then run the three Claude commands above. Re-adding refreshes the catalog from
+that branch; adding a different branch before changing the declaration is
+rejected by Claude Code.
+
+For Codex, remove the old marketplace registration before adding a different
+branch (skip the remove command for a new installation):
 
 ```sh
+codex plugin marketplace remove ras-commander-plugin
 codex plugin marketplace add gpt-cmdr/ras-commander-plugin --ref latest
 codex plugin marketplace upgrade ras-commander-plugin
 codex plugin add ras-commander@ras-commander-plugin
 ```
 
 To return to **release**, use `@main` for Claude Code or `--ref main` for Codex,
-then repeat the update commands. Restart the host after switching. Organization
+then repeat the respective registration and update steps. Restart the host after switching. Organization
 managed marketplace declarations must select the same branch. In Claude Code,
 enable marketplace auto-update in `/plugin` or set `autoUpdate: true` on its
 `extraKnownMarketplaces` entry. Codex users can run the upgrade commands above.
