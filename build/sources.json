@@ -9,9 +9,8 @@
       "contribution_skills": [
         "ras-commander-contributing"
       ],
-      "ref": "v0.110.3",
-      "commit": "c1333f0db5866e134e7841f953c1741cb9e3a39f",
-      "release": true
+      "ref": "main",
+      "commit": "4cb8cacd7ed7df5d23415e3ae9fbac797b40f865"
     },
     {
       "id": "hms-commander",
@@ -21,14 +20,12 @@
       "contribution_skills": [
         "hms-commander-contributing"
       ],
-      "ref": "v0.4.0",
-      "commit": "3b80c198af0a2949dd66d6a680aa6fd1e38f0fc3",
-      "generator_commit": "6ae3f61340e60ddd8b5b4c9bb9b1790147a56630",
-      "release": true,
+      "ref": "main",
+      "commit": "961501561ce5fd9757938aafe726dfc6e14d84f5",
       "release_generator_overrides": {
         "v0.4.0": "6ae3f61340e60ddd8b5b4c9bb9b1790147a56630"
       }
     }
   ],
-  "channel": "release"
+  "channel": "latest"
 }

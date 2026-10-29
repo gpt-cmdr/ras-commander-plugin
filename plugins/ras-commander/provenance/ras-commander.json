@@ -3,12 +3,12 @@
   "repository": "https://github.com/gpt-cmdr/ras-commander",
   "pypi_package": "ras-commander",
   "mcp_package": "ras-commander-mcp",
-  "ref": "v0.110.3",
-  "commit": "c1333f0db5866e134e7841f953c1741cb9e3a39f",
+  "ref": "main",
+  "commit": "4cb8cacd7ed7df5d23415e3ae9fbac797b40f865",
   "generator": {
     "path": "scripts/agent_framework/build_plugin.py",
     "sha256": "e745a5edb91a3b02b5dd3fa273bcb84c55b7508852bff9be4eb510c5bf6c86e3",
-    "commit": "c1333f0db5866e134e7841f953c1741cb9e3a39f"
+    "commit": "4cb8cacd7ed7df5d23415e3ae9fbac797b40f865"
   },
   "package_json_sha256": "ed746e99f316828cb8970f685f54079286cdeb7d2cc65cd1ef38c7fa911d94a2",
   "selection": {

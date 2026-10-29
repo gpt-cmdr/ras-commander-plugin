@@ -8,17 +8,27 @@
     },
     {
       "path": "skills/hms-cloud-native-gis/SKILL.md",
-      "sha256": "74727d6c3279576027791aac3da6647671d9479285a95523f723617a3bc49676",
+      "sha256": "bd8949d2f681d391fae2eef6a9e0453e50800c6b09031e091b3b15a544a8a90d",
+      "library": "hms-commander"
+    },
+    {
+      "path": "skills/hms-commander-contributing/SKILL.md",
+      "sha256": "c23ea27c5d41321ac99e4e36a7a28a86cdada805acc9259f5ec7ce18e5a7b444",
+      "library": "hms-commander"
+    },
+    {
+      "path": "skills/hms-commander-contributing/references/contribution-checks.md",
+      "sha256": "25656b87b9ed591853e15fbf0b1b9f0dc9163b678c7b7f0040a6b02dd7f407fa",
       "library": "hms-commander"
     },
     {
       "path": "skills/hms-commander/SKILL.md",
-      "sha256": "ff396b462e101d5e6b66bc7dce18c16360e98ffb0d3ade05810b8e4dcbb0c2b5",
+      "sha256": "bc561ed5389acc604ce7fa916e315da3db6545db50e450d313887d249381b887",
       "library": "hms-commander"
     },
     {
       "path": "skills/hms-ras-integration/SKILL.md",
-      "sha256": "ca0a81c3a31c6e8a5f3f14c4b38978869820c029e660dc1d8e1d54ccd4175aab",
+      "sha256": "21124382f4d8da9884447904129f941d81f0101c457b9207f1b9f012681adbfa",
       "library": "hms-commander"
     },
     {
