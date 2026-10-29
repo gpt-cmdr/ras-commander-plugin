@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "ras-commander",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander. Skills only on Codex: the read-only RAS/HMS text MCP servers ship in the Claude Code plugin, and project reads on Codex go through the public Python APIs.",
   "author": {
     "name": "gpt-cmdr",

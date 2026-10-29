@@ -4,10 +4,10 @@
   "pypi_package": "ras-commander",
   "mcp_package": "ras-commander-mcp",
   "ref": "main",
-  "commit": "94773afba17aa1ecbab0446007c6ef68f6e9f705",
+  "commit": "af92b288aaa4071b9274430c00f6ff0eaef5d90d",
   "generator": {
     "path": "scripts/agent_framework/build_plugin.py",
-    "sha256": "6309afa68443c6ffe1e079f82c78ab89d312868d6ad68182a6970a25462beb5c"
+    "sha256": "e745a5edb91a3b02b5dd3fa273bcb84c55b7508852bff9be4eb510c5bf6c86e3"
   },
   "package_json_sha256": "ed746e99f316828cb8970f685f54079286cdeb7d2cc65cd1ef38c7fa911d94a2",
   "selection": {
@@ -63,9 +63,9 @@
       },
       {
         "source": ".claude/skills/ras-commander/SKILL.md",
-        "source_sha256": "8dfd1f961e3bde665fd332b90954bdc6dd674213f88cb5ae5d2b0ecb278587bc",
+        "source_sha256": "2954b6353e89d7bdc9acb782897e71e88391ca0c44e5434af5cb0650c1d77ca1",
         "packaged": "skills/ras-commander/SKILL.md",
-        "packaged_sha256": "d2f363bb5ab508f46c6c9612b0c8f4517755ba8748cec2a52c424db995515154"
+        "packaged_sha256": "f3fdfa85ddaa8171bb91f98337ad5a10058080d9aacae935feb2fe803603f35b"
       }
     ]
   }
