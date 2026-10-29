@@ -81,7 +81,7 @@ def validate_manifest(plugin: Path) -> None:
     if not manifest:
         return
     check(manifest.get("name") == PLUGIN_NAME, "plugin name must be ras-commander")
-    check(bool(re.fullmatch(r"\d+\.\d+\.\d+", str(manifest.get("version", "")))), "plugin version must be X.Y.Z")
+    check(bool(re.fullmatch(r"\d+\.\d+\.\d+(?:-latest\.\d+)?", str(manifest.get("version", "")))), "plugin version must be X.Y.Z or X.Y.Z-latest.N")
     for key in ("description", "license", "repository"):
         check(bool(manifest.get(key)), f"plugin.json {key} is required")
     for key, option in (manifest.get("userConfig") or {}).items():
@@ -164,6 +164,9 @@ def validate_scripts(plugin: Path) -> None:
 
 def validate_generated(plugin: Path) -> None:
     sources = load_json(ROOT / "build" / "sources.json") or {}
+    channel = sources.get("channel")
+    check(channel in {"release", "latest"}, "build channel must be release or latest")
+    check(load_json(plugin / "update-channel.json") == {"channel": channel}, "runtime update channel is stale")
     record = load_json(plugin / "provenance" / "generated-files.json") or {}
     listed = {item["path"]: item for item in record.get("files", [])}
     present = {p.relative_to(plugin).as_posix() for d in ("skills", "resources")
@@ -176,16 +179,23 @@ def validate_generated(plugin: Path) -> None:
                   f"{path} was edited after generation; regenerate with tools/build_content.py")
     expected_skills: set[str] = set()
     for library in sources.get("libraries", []):
+        check((library.get("release") and library.get("ref") != "main") if channel == "release"
+              else library.get("ref") == "main" and not library.get("release"),
+              f"{library['id']}: source ref must match channel")
         provenance = load_json(plugin / "provenance" / f"{library['id']}.json")
         if not provenance:
             continue
         check(bool(re.fullmatch(r"[0-9a-f]{40}", library.get("commit", ""))), f"{library['id']}: pinned commit")
         check(provenance.get("ref") == library.get("ref"), f"{library['id']}: provenance ref")
         check(provenance.get("commit") == library.get("commit"), f"{library['id']}: provenance commit is stale")
+        check((provenance.get("generator") or {}).get("commit") == library.get("generator_commit", library.get("commit")),
+              f"{library['id']}: generator commit is stale")
         selection = provenance.get("selection", {})
         wanted = [e if isinstance(e, str) else e["name"] for e in library.get("contribution_skills", [])]
+        unavailable = selection.get("unavailable_in_release", [])
+        check(not unavailable or library.get("release"), f"{library['id']}: omitted skills require release source")
         check(selection.get("contribution_slot") == [s for s in wanted
-                                                     if s not in selection.get("library_default", [])],
+                                                     if s not in selection.get("library_default", []) and s not in unavailable],
               f"{library['id']}: contribution slot differs from build/sources.json")
         expected_skills |= set(selection.get("library_default", [])) | set(selection.get("contribution_slot", []))
         for item in provenance.get("source_provenance", {}).get("files", []):

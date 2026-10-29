@@ -1,6 +1,6 @@
 {
   "name": "ras-commander",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander, with read-only RAS/HMS text MCP servers that only their dedicated subagents may call.",
   "author": {
     "name": "gpt-cmdr",

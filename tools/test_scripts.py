@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "plugins" / "ras-commander" / "scripts"
@@ -111,6 +112,24 @@ class UpdateTests(unittest.TestCase):
         self.assertFalse(update.newer("0.5.0rc1", "0.5.0"))
         self.assertFalse(update.newer(None, "0.4.0"))
         self.assertFalse(update.newer("0.4.0", None))
+        self.assertTrue(update.newer("0.2.0-latest.10", "0.2.0-latest.9"))
+        self.assertFalse(update.newer("0.2.0-latest.1", "0.2.0"))
+        self.assertTrue(update.newer("0.2.0", "0.2.0-latest.1"))
+
+    def test_channel_chooses_its_own_remote(self):
+        for channel, branch in (("release", "main"), ("latest", "latest")):
+            with patch.object(update, "fetch_json", side_effect=[
+                    {"plugins": [{"name": "ras-commander", "source": "./plugins/ras-commander"}]},
+                    {"version": "0.2.0"}]) as fetch:
+                self.assertEqual(update.latest_plugin_version(channel), "0.2.0")
+                for call in fetch.call_args_list:
+                    self.assertIn(f"/{branch}/", call.args[0])
+
+    def test_notice_ignores_other_channel_cache(self):
+        with tempfile.TemporaryDirectory() as root:
+            update.write_json(os.path.join(root, "update-channel.json"), {"channel": "latest"})
+            update.write_json(os.path.join(root, ".claude-plugin/plugin.json"), {"version": "0.2.0-latest.1"})
+            self.assertIsNone(update.notice({"plugin": {"channel": "release", "latest": "9.9.9"}}, root))
 
     def test_notice(self):
         cache = {"packages": [
