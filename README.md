@@ -139,6 +139,10 @@ Then run the three Claude commands above. Re-adding refreshes the catalog from
 that branch; adding a different branch before changing the declaration is
 rejected by Claude Code.
 
+Channel switching was verified with Claude Code 2.1.312. If an older client
+rejects a matching declaration or no longer lists the catalog after selecting
+a ref, run `claude update`, then repeat the registration and update commands.
+
 For Codex, remove the old marketplace registration before adding a different
 branch (skip the remove command for a new installation):
 

@@ -14,6 +14,21 @@ import update_channel as publish
 
 
 class ChannelTests(unittest.TestCase):
+    def test_latest_flag_switches_metadata_even_when_skill_content_is_identical(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "plugin").mkdir()
+            (root / "staging").mkdir()
+            sources = root / "sources.json"
+            sources.write_text(json.dumps({"plugin_dir": "plugin", "channel": "release", "libraries": []}))
+            with patch.object(build, "ROOT", root), patch.object(build, "SOURCES", sources), \
+                    patch.object(build, "assemble", return_value=root / "staging"), \
+                    patch.object(build, "write_codex_manifests", return_value=[]), \
+                    patch.object(sys, "argv", ["build_content.py", "--latest"]):
+                self.assertEqual(build.main(), 0)
+            self.assertEqual(json.loads(sources.read_text())["channel"], "latest")
+            self.assertEqual(json.loads((root / "plugin/update-channel.json").read_text()), {"channel": "latest"})
+
     def test_no_op_restore_skips_absent_optional_resources(self):
         with patch.object(publish, "git", side_effect=[
                 "build/sources.json\nplugin/skills\nplugin/provenance", ""]) as git:
