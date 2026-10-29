@@ -41,31 +41,31 @@
         "source": ".claude/skills/hms-cloud-native-gis/SKILL.md",
         "source_sha256": "88dbe620ccb6a7fdb1ac0e8e6a4d9b4887adefce5431acfeae663ff19913ee21",
         "packaged": "skills/hms-cloud-native-gis/SKILL.md",
-        "packaged_sha256": "123172c8840cb97bab884fab803eeaefea55333dbcbc86e3a72aa419eb6cbd8a"
+        "packaged_sha256": "bd8949d2f681d391fae2eef6a9e0453e50800c6b09031e091b3b15a544a8a90d"
       },
       {
         "source": ".claude/skills/hms-commander-contributing/SKILL.md",
         "source_sha256": "d263824d6a547bc893f5eea0054b9cee160d6aafc4178ff9866bf2b70cbe206d",
         "packaged": "skills/hms-commander-contributing/SKILL.md",
-        "packaged_sha256": "e2b34e79f50f20e061cf29c845c2ca4e520f6f0118d3e5d9e56eacf2a0df2989"
+        "packaged_sha256": "c23ea27c5d41321ac99e4e36a7a28a86cdada805acc9259f5ec7ce18e5a7b444"
       },
       {
         "source": ".claude/skills/hms-commander-contributing/references/contribution-checks.md",
         "source_sha256": "25656b87b9ed591853e15fbf0b1b9f0dc9163b678c7b7f0040a6b02dd7f407fa",
         "packaged": "skills/hms-commander-contributing/references/contribution-checks.md",
-        "packaged_sha256": "964b66d8e4a88a12bdd535385e3e214dda3c40eb4ca6de1cc98333afdbe425b3"
+        "packaged_sha256": "25656b87b9ed591853e15fbf0b1b9f0dc9163b678c7b7f0040a6b02dd7f407fa"
       },
       {
         "source": ".claude/skills/hms-commander/SKILL.md",
         "source_sha256": "b2dc1e6494f87697ecee94fbfcf5682b525df58ec28e041118524d2d4b55bb7c",
         "packaged": "skills/hms-commander/SKILL.md",
-        "packaged_sha256": "ab07ee85c06619ef3e640ae6abbc95433ac3b665ee73b03363147463e271c14a"
+        "packaged_sha256": "bc561ed5389acc604ce7fa916e315da3db6545db50e450d313887d249381b887"
       },
       {
         "source": ".claude/skills/hms-ras-integration/SKILL.md",
         "source_sha256": "9a859b8030e93ed965ba5b602b4e1b4f5ddb9bfc15c41c4412e4d2ff86d90de2",
         "packaged": "skills/hms-ras-integration/SKILL.md",
-        "packaged_sha256": "47ac344e4ce490bc3be61395389490a5270a67e4bb4da76f4dc69cc1bb1dbc7f"
+        "packaged_sha256": "21124382f4d8da9884447904129f941d81f0101c457b9207f1b9f012681adbfa"
       }
     ]
   }

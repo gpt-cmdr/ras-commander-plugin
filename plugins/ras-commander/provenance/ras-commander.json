@@ -41,31 +41,31 @@
         "source": ".claude/skills/cloud-native-gis/SKILL.md",
         "source_sha256": "08f83be44b4b30a10a973f9a76f60376133651f753efc9c4d92b14836b4e70d3",
         "packaged": "skills/cloud-native-gis/SKILL.md",
-        "packaged_sha256": "bb4573f8e6d0c226e475a8aaa7de0ef18f3ac195fa4b81321f79ad22f4e22a22"
+        "packaged_sha256": "a14913c972e1cf0936559522e6aa7e008889579bd385ecfd89c8fd31f64395a9"
       },
       {
         "source": ".claude/skills/ras-api-discovery/SKILL.md",
         "source_sha256": "dde347593938a60b246037c96001f6ee323821f5503ef0544867558454fe2561",
         "packaged": "skills/ras-api-discovery/SKILL.md",
-        "packaged_sha256": "284061e16b6ec5d939ec834bf2792a55592344cde04c3c23ef08719e382d80af"
+        "packaged_sha256": "56cb77de948fbb1dda33196b2ea09fb7dd0547c8be64774eeed0c5cea361146e"
       },
       {
         "source": ".claude/skills/ras-commander-contributing/SKILL.md",
         "source_sha256": "e48083f569c9caf1d761a2d020aa4dea903764c34aab84a729efb6ccbc71284f",
         "packaged": "skills/ras-commander-contributing/SKILL.md",
-        "packaged_sha256": "06980e4af5030c4e963da950a2b3dc2e5123620bede9b3f2447ce36f4a1238a5"
+        "packaged_sha256": "ef074705eadf5a2ac21ab6f19b2a1a29acc02ec9893b82b42cd773d15a22bc9e"
       },
       {
         "source": ".claude/skills/ras-commander-contributing/references/contribution-checks.md",
         "source_sha256": "568fccbf15b979aa8cd0a3440737d6d7dbd73b71bc25fab89d7c075bf3d4a6d3",
         "packaged": "skills/ras-commander-contributing/references/contribution-checks.md",
-        "packaged_sha256": "2d13a71ced6d1908de5f10d4372d0de9296712fcfcb550e700ebd7d350d46077"
+        "packaged_sha256": "568fccbf15b979aa8cd0a3440737d6d7dbd73b71bc25fab89d7c075bf3d4a6d3"
       },
       {
         "source": ".claude/skills/ras-commander/SKILL.md",
         "source_sha256": "8dfd1f961e3bde665fd332b90954bdc6dd674213f88cb5ae5d2b0ecb278587bc",
         "packaged": "skills/ras-commander/SKILL.md",
-        "packaged_sha256": "1311abfcd0e4c367fe1072ed02eb8ba7f937df61e2d1a74b0ef9cc23d6ddfdef"
+        "packaged_sha256": "d2f363bb5ab508f46c6c9612b0c8f4517755ba8748cec2a52c424db995515154"
       }
     ]
   }

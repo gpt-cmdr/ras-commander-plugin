@@ -61,6 +61,19 @@ AGENT_PLUGINS_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.js
 CODEX_DESCRIPTION = ("HEC-RAS, HEC-HMS, and cloud-native GIS skills from RAS Commander and HMS Commander. "
                      "Skills only on Codex: the read-only RAS/HMS text MCP servers ship in the Claude Code "
                      "plugin, and project reads on Codex go through the public Python APIs.")
+# Runs a library generator with Path.write_text defaulting to LF. Generators call
+# write_text without newline=, which writes CRLF on Windows and changes the
+# recorded hashes; this keeps the output byte-identical on every OS.
+GENERATOR_SHIM = """\
+import os, pathlib, runpy, sys
+_write_text = pathlib.Path.write_text
+def write_text(self, data, encoding=None, errors=None, newline=None):
+    return _write_text(self, data, encoding, errors, "\\n" if newline is None else newline)
+pathlib.Path.write_text = write_text
+sys.argv = sys.argv[1:]
+sys.path.insert(0, os.path.dirname(os.path.abspath(sys.argv[0])))
+runpy.run_path(sys.argv[0], run_name="__main__")
+"""
 
 
 def sha256(path: Path) -> str:
@@ -147,7 +160,8 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
         package_path.write_text(json.dumps(package, indent=2) + "\n", encoding="utf-8")
     generator = checkout / "scripts" / "agent_framework" / "build_plugin.py"
     output = workdir / f"out-{library['id']}"
-    run([sys.executable, str(generator), "--repo-root", str(checkout), "--output", str(output)])
+    run([sys.executable, "-c", GENERATOR_SHIM, str(generator),
+         "--repo-root", str(checkout), "--output", str(output)])
     record = {
         "library": library["id"],
         "repository": library["repository"],

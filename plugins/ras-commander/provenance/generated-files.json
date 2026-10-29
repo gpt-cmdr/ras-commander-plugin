@@ -3,52 +3,52 @@
   "files": [
     {
       "path": "skills/cloud-native-gis/SKILL.md",
-      "sha256": "bb4573f8e6d0c226e475a8aaa7de0ef18f3ac195fa4b81321f79ad22f4e22a22",
+      "sha256": "a14913c972e1cf0936559522e6aa7e008889579bd385ecfd89c8fd31f64395a9",
       "library": "ras-commander"
     },
     {
       "path": "skills/hms-cloud-native-gis/SKILL.md",
-      "sha256": "123172c8840cb97bab884fab803eeaefea55333dbcbc86e3a72aa419eb6cbd8a",
+      "sha256": "bd8949d2f681d391fae2eef6a9e0453e50800c6b09031e091b3b15a544a8a90d",
       "library": "hms-commander"
     },
     {
       "path": "skills/hms-commander-contributing/SKILL.md",
-      "sha256": "e2b34e79f50f20e061cf29c845c2ca4e520f6f0118d3e5d9e56eacf2a0df2989",
+      "sha256": "c23ea27c5d41321ac99e4e36a7a28a86cdada805acc9259f5ec7ce18e5a7b444",
       "library": "hms-commander"
     },
     {
       "path": "skills/hms-commander-contributing/references/contribution-checks.md",
-      "sha256": "964b66d8e4a88a12bdd535385e3e214dda3c40eb4ca6de1cc98333afdbe425b3",
+      "sha256": "25656b87b9ed591853e15fbf0b1b9f0dc9163b678c7b7f0040a6b02dd7f407fa",
       "library": "hms-commander"
     },
     {
       "path": "skills/hms-commander/SKILL.md",
-      "sha256": "ab07ee85c06619ef3e640ae6abbc95433ac3b665ee73b03363147463e271c14a",
+      "sha256": "bc561ed5389acc604ce7fa916e315da3db6545db50e450d313887d249381b887",
       "library": "hms-commander"
     },
     {
       "path": "skills/hms-ras-integration/SKILL.md",
-      "sha256": "47ac344e4ce490bc3be61395389490a5270a67e4bb4da76f4dc69cc1bb1dbc7f",
+      "sha256": "21124382f4d8da9884447904129f941d81f0101c457b9207f1b9f012681adbfa",
       "library": "hms-commander"
     },
     {
       "path": "skills/ras-api-discovery/SKILL.md",
-      "sha256": "284061e16b6ec5d939ec834bf2792a55592344cde04c3c23ef08719e382d80af",
+      "sha256": "56cb77de948fbb1dda33196b2ea09fb7dd0547c8be64774eeed0c5cea361146e",
       "library": "ras-commander"
     },
     {
       "path": "skills/ras-commander-contributing/SKILL.md",
-      "sha256": "06980e4af5030c4e963da950a2b3dc2e5123620bede9b3f2447ce36f4a1238a5",
+      "sha256": "ef074705eadf5a2ac21ab6f19b2a1a29acc02ec9893b82b42cd773d15a22bc9e",
       "library": "ras-commander"
     },
     {
       "path": "skills/ras-commander-contributing/references/contribution-checks.md",
-      "sha256": "2d13a71ced6d1908de5f10d4372d0de9296712fcfcb550e700ebd7d350d46077",
+      "sha256": "568fccbf15b979aa8cd0a3440737d6d7dbd73b71bc25fab89d7c075bf3d4a6d3",
       "library": "ras-commander"
     },
     {
       "path": "skills/ras-commander/SKILL.md",
-      "sha256": "1311abfcd0e4c367fe1072ed02eb8ba7f937df61e2d1a74b0ef9cc23d6ddfdef",
+      "sha256": "d2f363bb5ab508f46c6c9612b0c8f4517755ba8748cec2a52c424db995515154",
       "library": "ras-commander"
     }
   ]

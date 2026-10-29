@@ -1,0 +1,3 @@
+# Generated skills are verified by SHA-256 against provenance, so the working
+# copy must hold the same LF bytes on every OS.
+* text=auto eol=lf
