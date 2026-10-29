@@ -143,9 +143,10 @@ hms-commander-mcp`. The plugin does not use those copies.
 
 ### Update the plugin (skills, agents, hooks)
 
-The skills track `main` of ras-commander and hms-commander. A scheduled job
-regenerates them every three hours and publishes a new plugin patch version
-whenever they change (see [Maintenance](#maintenance)).
+The skills track `main` of ras-commander and hms-commander. Each library sends a
+notification on pushes to `main`, triggering a validated rebuild. A weekly check
+on Monday at 10:23 UTC recovers missed notifications. Changed packaged content
+receives a new plugin patch version (see [Maintenance](#maintenance)).
 
 **Turn on auto-update (recommended).** Claude Code auto-updates plugins only
 from marketplaces with auto-update on, and it is off by default for
@@ -238,13 +239,24 @@ the library's default selection is skipped, which is now the case for
 `--check` rebuild from the pinned sources, and runs the script tests on
 Windows, macOS, and Linux. CI cannot run `claude plugin validate`, so run it
 locally before you merge changes to the tools, scripts, or manifests.
-`regenerate.yml` runs every three hours, on manual dispatch, and on a
+`regenerate.yml` runs weekly on Monday at 10:23 UTC, on manual dispatch, and on a
 `library-release` or `library-main-updated` repository dispatch. It pins each
 library to the head of `main` and rebuilds. If no packaged skill or resource
 changed, it keeps the current pins and does nothing. Otherwise it runs the
 structure, provenance, and `--check` validation, bumps the plugin patch
 version, and pushes the commit straight to `main`. If validation fails,
 nothing is pushed and the run fails. It never publishes to PyPI.
+
+**Upstream notifications.** Each library's `notify-commander-plugin.yml` sends
+`library-main-updated` on every push to `main`. Configure `PLUGIN_DISPATCH_TOKEN`
+as an Actions secret in both library repositories: a fine-grained token limited
+to this plugin repository, with Contents: write. GitHub requires that permission
+for [repository dispatch](https://docs.github.com/en/rest/repos/repos#create-a-repository-dispatch-event).
+The upstream default `GITHUB_TOKEN` cannot dispatch to another repository.
+Notifications trigger builds promptly; the weekly check is a recovery mechanism.
+Only actual skill/resource changes produce releases, so library code-only pushes
+do not create empty plugin versions. GitHub schedules may start later than the
+configured time.
 
 ## License
 

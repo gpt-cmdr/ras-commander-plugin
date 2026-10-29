@@ -9,7 +9,8 @@ name: Regenerate from library main
 
 on:
   schedule:
-    - cron: "23 */3 * * *"
+    # Weekly recovery for missed upstream notifications: Monday, 10:23 UTC.
+    - cron: "23 10 * * 1"
   workflow_dispatch:
   repository_dispatch:
     types: [library-release, library-main-updated]
