@@ -87,8 +87,10 @@ def branch_head(library: dict, override: str | None) -> str:
 def release_pin(library: dict) -> tuple[str, str]:
     """Use GitHub's latest non-draft, non-prerelease release, never a main SHA."""
     repository = library["repository"].removeprefix("https://github.com/").removesuffix(".git")
-    request = urllib.request.Request(f"https://api.github.com/repos/{repository}/releases/latest",
-                                     headers={"User-Agent": "commander-plugin-builder"})
+    headers = {"User-Agent": "commander-plugin-builder"}
+    if os.environ.get("GH_TOKEN"):
+        headers["Authorization"] = f"Bearer {os.environ['GH_TOKEN']}"
+    request = urllib.request.Request(f"https://api.github.com/repos/{repository}/releases/latest", headers=headers)
     with urllib.request.urlopen(request, timeout=30) as response:
         release = json.load(response)
     tag = release["tag_name"]
@@ -320,6 +322,10 @@ def main() -> int:
     parser.add_argument("--repo-override", action="append", default=[], metavar="ID=URL",
                         help="clone a library from another URL/path (testing)")
     arguments = parser.parse_args()
+    if arguments.latest:
+        if arguments.channel:
+            parser.error("choose --channel or --latest, not both")
+        arguments.channel = "latest"
 
     sources = json.loads(SOURCES.read_text(encoding="utf-8"))
     overrides = dict(item.split("=", 1) for item in arguments.repo_override)
@@ -329,6 +335,11 @@ def main() -> int:
             if arguments.channel == "release":
                 library["ref"], library["commit"] = release_pin(library)
                 library["release"] = True
+                builder = library.get("release_generator_overrides", {}).get(library["ref"])
+                if builder:
+                    library["generator_commit"] = builder
+                else:
+                    library.pop("generator_commit", None)
             else:
                 library["ref"] = "main"
                 library.pop("release", None)

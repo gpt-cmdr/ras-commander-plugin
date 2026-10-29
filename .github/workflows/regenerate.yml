@@ -54,4 +54,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Build, validate, and publish channel
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python tools/update_channel.py --channel ${{ matrix.channel }} --publish

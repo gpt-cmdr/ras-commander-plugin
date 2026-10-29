@@ -14,6 +14,13 @@ import update_channel as publish
 
 
 class ChannelTests(unittest.TestCase):
+    def test_no_op_restore_skips_absent_optional_resources(self):
+        with patch.object(publish, "git", side_effect=[
+                "build/sources.json\nplugin/skills\nplugin/provenance", ""]) as git:
+            publish.restore_snapshot("abc", "plugin")
+            self.assertEqual(git.call_args.args,
+                             ("restore", "--source", "abc", "--", "build/sources.json", "plugin/skills", "plugin/provenance"))
+
     def test_release_uses_peeled_tag_not_release_target_branch(self):
         response = io.BytesIO(json.dumps({"tag_name": "v1.2.3", "target_commitish": "main"}).encode())
         refs = "a" * 40 + "\trefs/tags/v1.2.3\n" + "b" * 40 + "\trefs/tags/v1.2.3^{}"

@@ -50,6 +50,13 @@ def payload(ref: str | None, plugin: str) -> dict:
     return result
 
 
+def restore_snapshot(ref: str, plugin: str) -> None:
+    paths = ["build/sources.json", *(f"{plugin}/{name}" for name in build.GENERATED)]
+    # Resources are optional; git restore rejects a path absent from both trees.
+    present = git("ls-tree", "--name-only", ref, "--", *paths).splitlines()
+    git("restore", "--source", ref, "--", *present)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--channel", choices=("release", "latest"), required=True)
@@ -76,8 +83,7 @@ def main() -> None:
         manifest["version"] = next_version(stable, previous, args.channel)
     else:
         # Library code-only pushes keep the previous snapshot and cache version.
-        git("restore", "--source", old, "--", "build/sources.json",
-            *(f"{plugin}/{name}" for name in build.GENERATED))
+        restore_snapshot(old, plugin)
         manifest["version"] = previous
     path.write_text(build.dumps(manifest), encoding="utf-8", newline="\n")
     build.write_codex_manifests(build.ROOT / plugin)
