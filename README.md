@@ -96,6 +96,66 @@ its SHA-256 hash, and the package versions. Geometry, HDF/DSS results,
 execution, and edits are outside the MCP servers' scope. For those tasks the
 skills direct Claude to the `ras-commander` and `hms-commander` Python APIs.
 
+## Update channels
+
+New installs use **release** by default. Choose one marketplace branch; the plugin
+name remains `ras-commander` in both hosts.
+
+| Channel | Marketplace branch | Skill sources | Updates |
+| --- | --- | --- | --- |
+| `release` (default) | `main` | Latest published, non-prerelease library release tags | Library release notification |
+| `latest` | `latest` | RAS Commander and HMS Commander `main` | Library push notification |
+
+The `latest` channel can describe APIs that are not on PyPI yet. Check installed
+signatures before using them. Channels select plugin instructions; MCP servers
+continue to resolve published PyPI packages, and existing Python environment pins
+are preserved. A release bundle omits optional contribution skills that do not
+exist in the published source tag.
+
+For a new **latest** installation in Claude Code:
+
+```sh
+claude plugin marketplace add gpt-cmdr/ras-commander-plugin@latest
+claude plugin marketplace update ras-commander-plugin
+claude plugin update ras-commander@ras-commander-plugin
+```
+
+For an existing Claude installation, first change this marketplace's source
+`ref` to `latest` in `~/.claude/settings.json` (or the active
+`CLAUDE_CONFIG_DIR/settings.json`). Keep its other settings:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "ras-commander-plugin": {
+      "source": {"source": "github", "repo": "gpt-cmdr/ras-commander-plugin", "ref": "latest"},
+      "autoUpdate": true
+    }
+  }
+}
+```
+
+Then run the three Claude commands above. Re-adding refreshes the catalog from
+that branch; adding a different branch before changing the declaration is
+rejected by Claude Code.
+
+For Codex, remove the old marketplace registration before adding a different
+branch (skip the remove command for a new installation):
+
+```sh
+codex plugin marketplace remove ras-commander-plugin
+codex plugin marketplace add gpt-cmdr/ras-commander-plugin --ref latest
+codex plugin marketplace upgrade ras-commander-plugin
+codex plugin add ras-commander@ras-commander-plugin
+```
+
+To return to **release**, use `@main` for Claude Code or `--ref main` for Codex,
+then repeat the respective registration and update steps. Restart the host after switching. Organization
+managed marketplace declarations must select the same branch. In Claude Code,
+enable marketplace auto-update in `/plugin` or set `autoUpdate: true` on its
+`extraKnownMarketplaces` entry. Codex users can run the upgrade commands above.
+Host update settings determine when a published bundle reaches an installation.
+
 ## Updates
 
 ### Update notice
@@ -211,10 +271,9 @@ servers do not perform either operation.
   servers, subagents, or hooks. On those hosts the skills fall back to the
   public Python APIs or report that a capability is missing. They never call
   project MCP from the main agent.
-- **The skills follow library `main`, not PyPI releases.** They are regenerated
-  from each library's `main` branch, as described in [Maintenance](#maintenance),
-  and reach you through auto-update or `claude plugin update`. They can
-  describe APIs that `main` has but the latest PyPI release does not yet have.
+- **The `latest` channel follows library `main`.** Its skills can describe APIs
+  that are not released to PyPI. The default `release` channel uses published
+  library release tags.
 - **uv is required.** If `uv` is not on `PATH`, the servers and hooks do not
   start.
 
@@ -227,7 +286,7 @@ plugins/ras-commander/
   agents/{ras-text,hms-text}.md     read-only subagents (one per server)
   hooks/hooks.json                  PreToolUse guard, SessionStart delegation hint and update notice
   scripts/                          launcher, guard, update check (stdlib Python)
-  skills/                           GENERATED from library main (do not edit)
+  skills/                           GENERATED from the selected channel (do not edit)
   provenance/                       refs, commits, generator hashes, file hashes
 build/sources.json                  tracked ref, pinned commit, contribution-skill slot
 tools/build_content.py              regenerate skills from the pinned library commits
@@ -237,55 +296,40 @@ tools/test_scripts.py               unit tests for the runtime scripts
 
 ## Maintenance
 
-The skills are never copied by hand. Each library entry in
-`build/sources.json` names a tracked `ref` (`main`) and a pinned `commit`.
-`tools/build_content.py` fetches that commit and runs its own
-`scripts/agent_framework/build_plugin.py`, which selects skills through
-`.claude/plugin/package.json`. The script then merges the generated `skills/`
-into the plugin. It records the ref, commit, generator SHA-256, selection, and
-every source and packaged file hash under `plugins/ras-commander/provenance/`.
-`--latest` moves each pin to the current head of its ref. Plain builds and
-`--check` use the pinned commit, so CI results are reproducible.
+The skills are generated from the pinned library commits in `build/sources.json`.
+That file records `channel`, source `ref`, and exact `commit` for each library.
+The canonical library generator enforces shared distribution approval, contained
+links, and source/package hashes. Release snapshots that predate the UTF-8/LF
+fix use a separately pinned canonical generator commit, recorded in provenance;
+all packaged skill and resource text still comes from the release tag.
 
 ```sh
-python tools/build_content.py            # rebuild from the pinned commits
-python tools/build_content.py --check    # fail if committed content differs
-python tools/build_content.py --latest --bump-on-change   # follow library main
+python tools/build_content.py --check
+python tools/build_content.py --channel release  # refresh published release tags
+python tools/build_content.py --channel latest   # refresh library main
 python tools/validate.py
-python -m unittest tools/test_scripts.py
-claude plugin validate plugins/ras-commander   # local only
+python -m unittest tools/test_scripts.py tools/test_channels.py
+claude plugin validate plugins/ras-commander
 ```
 
-**Contribution-skill slot.** Each library entry in `build/sources.json` has a
-`contribution_skills` list. A name selects a skill from the pinned commit. An
-object `{"name": ..., "ref": "<branch>"}` takes the skill from a pre-merge
-branch. Either way, the skill goes through the library's generator and its
-ref and commit are recorded in provenance. A slot skill that is already in
-the library's default selection is skipped, which is now the case for
-`ras-commander-contributing` and `hms-commander-contributing` on `main`.
+`tools/update_channel.py` runs in a clean CI checkout of `main`. It uses shared
+runtime code from `main`, rebuilds the selected channel, validates it, and pushes
+a normal fast-forward commit. The `latest` branch retains its own generated
+content and `X.Y.Z-latest.N` cache version. Source provenance changes alone do not
+bump the version. Runtime or packaged skill/resource changes do. Plain builds
+and `--check` use exact pins, so validation is reproducible.
 
-**CI.** `validate.yml` runs the structure and provenance checks, plus a
-`--check` rebuild from the pinned sources, and runs the script tests on
-Windows, macOS, and Linux. CI cannot run `claude plugin validate`, so run it
-locally before you merge changes to the tools, scripts, or manifests.
-`regenerate.yml` runs weekly on Monday at 10:23 UTC, on manual dispatch, and on a
-`library-release` or `library-main-updated` repository dispatch. It pins each
-library to the head of `main` and rebuilds. If no packaged skill or resource
-changed, it keeps the current pins and does nothing. Otherwise it runs the
-structure, provenance, and `--check` validation, bumps the plugin patch
-version, and pushes the commit straight to `main`. If validation fails,
-nothing is pushed and the run fails. It never publishes to PyPI.
+`regenerate.yml` updates `latest` after a library main notification or a plugin
+`main` push. A `library-release` notification, manual dispatch, or Monday 10:23 UTC
+fallback updates both channels. Source notifications trigger builds promptly;
+GitHub queue times and host update settings still apply. Builds never publish
+Python packages or change project environments.
 
-**Upstream notifications.** Each library's `notify-commander-plugin.yml` sends
-`library-main-updated` on every push to `main`. Configure `PLUGIN_DISPATCH_TOKEN`
-as an Actions secret in both library repositories: a fine-grained token limited
-to this plugin repository, with Contents: write. GitHub requires that permission
-for [repository dispatch](https://docs.github.com/en/rest/repos/repos#create-a-repository-dispatch-event).
-The upstream default `GITHUB_TOKEN` cannot dispatch to another repository.
-Notifications trigger builds promptly; the weekly check is a recovery mechanism.
-Only actual skill/resource changes produce releases, so library code-only pushes
-do not create empty plugin versions. GitHub schedules may start later than the
-configured time.
+Each upstream `notify-commander-plugin.yml` sends `library-main-updated` on pushes
+to `main` and `library-release` when a release is published. Both use the Actions
+secret `PLUGIN_DISPATCH_TOKEN`: a fine-grained token restricted to this plugin
+repository with Contents: write. The upstream default `GITHUB_TOKEN` cannot send
+cross-repository dispatches. See the [GitHub repository dispatch API](https://docs.github.com/en/rest/repos/repos#create-a-repository-dispatch-event).
 
 ### Dispatch token renewal
 

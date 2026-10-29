@@ -2,7 +2,7 @@ name: Validate plugin
 
 on:
   push:
-    branches: [main]
+    branches: [main, latest]
   pull_request:
   workflow_dispatch:
 
@@ -32,4 +32,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Hook and launcher tests (stdlib only, through uv's Python)
-        run: uv run --no-project python -m unittest tools/test_scripts.py -v
+        run: uv run --no-project python -m unittest tools/test_scripts.py tools/test_channels.py -v

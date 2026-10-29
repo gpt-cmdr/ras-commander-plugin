@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the plugin's skills from the libraries' tracked branch (``main``).
+"""Regenerate plugin skills from pinned release tags or library main.
 
 Skills are never hand-copied. For each library in ``build/sources.json`` this
 script fetches the pinned ``commit`` of the tracked ``ref`` (``main``), runs that
@@ -50,6 +50,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,6 +84,27 @@ def branch_head(library: dict, override: str | None) -> str:
     return run(["git", "ls-remote", "--exit-code", url, f"refs/heads/{library['ref']}"]).split()[0]
 
 
+def release_pin(library: dict) -> tuple[str, str]:
+    """Use GitHub's latest non-draft, non-prerelease release, never a main SHA."""
+    repository = library["repository"].removeprefix("https://github.com/").removesuffix(".git")
+    headers = {"User-Agent": "commander-plugin-builder"}
+    if os.environ.get("GH_TOKEN"):
+        headers["Authorization"] = f"Bearer {os.environ['GH_TOKEN']}"
+    request = urllib.request.Request(f"https://api.github.com/repos/{repository}/releases/latest", headers=headers)
+    with urllib.request.urlopen(request, timeout=30) as response:
+        release = json.load(response)
+    tag = release["tag_name"]
+    if release.get("draft") or release.get("prerelease"):
+        raise SystemExit(f"{repository}: expected a published stable release")
+    refs = run(["git", "ls-remote", "--exit-code", library["repository"],
+                f"refs/tags/{tag}", f"refs/tags/{tag}^{{}}"])
+    pins = dict(line.split()[::-1] for line in refs.splitlines())
+    commit = pins.get(f"refs/tags/{tag}^{{}}", pins.get(f"refs/tags/{tag}"))
+    if not commit or not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise SystemExit(f"{repository}: published tag {tag} does not resolve to a commit")
+    return tag, commit
+
+
 def fetch_commit(url: str, commit: str, destination: Path) -> None:
     run(["git", "init", "--quiet", str(destination)])
     # Byte-identical checkouts on every OS; a global autocrlf would change hashes.
@@ -108,6 +130,7 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
     default = list(package["skills"])
     slot: list[str] = []
     slot_sources: list[dict] = []
+    unavailable: list[str] = []
     for entry in library.get("contribution_skills", []):
         entry = {"name": entry} if isinstance(entry, str) else dict(entry)
         name, slot_ref = entry["name"], entry.get("ref")
@@ -138,6 +161,11 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
                       "commit": run(["git", "-C", str(branch), "rev-parse", "HEAD"]),
                       "note": entry.get("note", "")}
         if not (skill_dir / "SKILL.md").is_file():
+            if library.get("release"):
+                # Optional integration skills added after a release wait for the
+                # next release; release bundles never borrow skill text from main.
+                unavailable.append(name)
+                continue
             raise SystemExit(f"{library['id']} {commit}: contribution skill '{name}' is not on {ref}")
         slot.append(name)
         slot_sources.append(origin)
@@ -145,6 +173,10 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
         package["skills"] = default + slot
         package_path.write_text(json.dumps(package, indent=2) + "\n", encoding="utf-8", newline="\n")
     generator = checkout / "scripts" / "agent_framework" / "build_plugin.py"
+    if library.get("generator_commit"):
+        builder = workdir / f"builder-{library['id']}"
+        fetch_commit(override or library["repository"], library["generator_commit"], builder)
+        generator = builder / "scripts" / "agent_framework" / "build_plugin.py"
     output = workdir / f"out-{library['id']}"
     run([sys.executable, str(generator),
          "--repo-root", str(checkout), "--output", str(output)])
@@ -155,10 +187,11 @@ def generate(library: dict, workdir: Path, override: str | None) -> tuple[Path, 
         "mcp_package": library["mcp_package"],
         "ref": ref,
         "commit": commit,
-        "generator": {"path": "scripts/agent_framework/build_plugin.py", "sha256": sha256(generator)},
+        "generator": {"path": "scripts/agent_framework/build_plugin.py", "sha256": sha256(generator),
+                      "commit": library.get("generator_commit", commit)},
         "package_json_sha256": original_sha,
         "selection": {"library_default": default, "contribution_slot": slot,
-                      "contribution_sources": slot_sources},
+                      "contribution_sources": slot_sources, "unavailable_in_release": unavailable},
         "generated_manifest": json.loads((output / "plugin.json").read_text(encoding="utf-8")),
         "source_provenance": json.loads((output / "source-provenance.json").read_text(encoding="utf-8")),
     }
@@ -280,6 +313,8 @@ def bump_patch(manifest_path: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--latest", action="store_true", help="pin each library to the head of its tracked ref")
+    parser.add_argument("--channel", choices=("release", "latest"),
+                        help="refresh from published release tags or library main")
     parser.add_argument("--check", action="store_true", help="exit 1 if committed content differs")
     parser.add_argument("--bump-on-change", action="store_true", help="bump the plugin patch version on change")
     parser.add_argument("--codex-only", action="store_true",
@@ -287,10 +322,30 @@ def main() -> int:
     parser.add_argument("--repo-override", action="append", default=[], metavar="ID=URL",
                         help="clone a library from another URL/path (testing)")
     arguments = parser.parse_args()
+    if arguments.latest:
+        if arguments.channel:
+            parser.error("choose --channel or --latest, not both")
+        arguments.channel = "latest"
 
     sources = json.loads(SOURCES.read_text(encoding="utf-8"))
     overrides = dict(item.split("=", 1) for item in arguments.repo_override)
-    if arguments.latest:
+    if arguments.channel:
+        sources["channel"] = arguments.channel
+        for library in sources["libraries"]:
+            if arguments.channel == "release":
+                library["ref"], library["commit"] = release_pin(library)
+                library["release"] = True
+                builder = library.get("release_generator_overrides", {}).get(library["ref"])
+                if builder:
+                    library["generator_commit"] = builder
+                else:
+                    library.pop("generator_commit", None)
+            else:
+                library["ref"] = "main"
+                library.pop("release", None)
+                library.pop("generator_commit", None)
+                library["commit"] = branch_head(library, overrides.get(library["id"]))
+    elif arguments.latest:
         for library in sources["libraries"]:
             library["commit"] = branch_head(library, overrides.get(library["id"]))
     plugin_dir = ROOT / sources["plugin_dir"]
@@ -310,6 +365,9 @@ def main() -> int:
         changed = sorted(set(before) ^ set(after) | {k for k in before.keys() & after.keys() if before[k] != after[k]})
         if arguments.check:
             changed += stale_codex_manifests(plugin_dir)
+            channel_path = plugin_dir / "update-channel.json"
+            if not channel_path.is_file() or json.loads(channel_path.read_text(encoding="utf-8")) != {"channel": sources.get("channel", "release")}:
+                changed.append("update-channel.json")
             if changed:
                 print("Generated content differs from the pinned library commits:\n  " + "\n  ".join(changed))
                 return 1
@@ -327,8 +385,10 @@ def main() -> int:
             shutil.rmtree(plugin_dir / name, ignore_errors=True)
             if (staging / name).is_dir():
                 shutil.copytree(staging / name, plugin_dir / name)
-    if arguments.latest:
+    if arguments.latest or arguments.channel:
         SOURCES.write_text(json.dumps(sources, indent=2) + "\n", encoding="utf-8", newline="\n")
+    (plugin_dir / "update-channel.json").write_text(dumps({"channel": sources.get("channel", "release")}),
+                                                  encoding="utf-8", newline="\n")
     if changed:
         print(f"Updated {len(changed)} generated file(s).")
         if arguments.bump_on_change:

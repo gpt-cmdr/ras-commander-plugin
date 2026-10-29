@@ -27,9 +27,6 @@ CACHE_NAME = "update-check.json"
 STATE_NAME = "update-check-attempt.json"
 MARKETPLACE = "ras-commander-plugin"
 PLUGIN = "ras-commander"
-MARKETPLACE_URL = ("https://raw.githubusercontent.com/gpt-cmdr/ras-commander-plugin/"
-                   "main/.claude-plugin/marketplace.json")
-RAW_BASE = "https://raw.githubusercontent.com/gpt-cmdr/ras-commander-plugin/main/"
 # Each text MCP server and the library it launches with.
 SERVERS = {
     "ras-commander-mcp": "ras-commander",
@@ -46,8 +43,15 @@ def version_key(text: str) -> tuple:
     while release and release[-1] == 0:
         release = release[:-1]
     suffix = match.group(2).strip().lower()
-    final = 0 if re.search(r"(a|b|rc|dev|alpha|beta|pre|c)\d*", suffix) else 1
-    return (release, final)
+    final = 0 if suffix and not suffix.startswith(("+", ".post")) else 1
+    parts = tuple((1, int(p)) if p.isdigit() else (0, p)
+                  for p in re.findall(r"\d+|[a-z]+", suffix))
+    return (release, final, parts)
+
+
+def channel(plugin_root: str) -> str:
+    value = (read_json(os.path.join(plugin_root, "update-channel.json")) or {}).get("channel")
+    return "latest" if value == "latest" else "release"
 
 
 def newer(latest: str | None, current: str | None) -> bool:
@@ -83,6 +87,8 @@ def notice(cache: dict, plugin_root: str) -> str | None:
             parts.append(f"{item['name']} {item['cached']} -> {item['latest']}")
             clean += [item["server"], SERVERS[item["server"]]]
     plugin = cache.get("plugin") or {}
+    if plugin.get("channel", "release") != channel(plugin_root):
+        plugin = {}  # A shared data cache may have been written before a channel switch.
     installed = local_plugin_version(plugin_root)
     plugin_update = newer(plugin.get("latest"), installed)
     if plugin_update:
@@ -157,13 +163,15 @@ def cached_versions(server: str) -> dict:
     return {}
 
 
-def latest_plugin_version() -> str | None:
-    marketplace = fetch_json(MARKETPLACE_URL)
+def latest_plugin_version(update_channel: str = "release") -> str | None:
+    branch = "latest" if update_channel == "latest" else "main"
+    base = f"https://raw.githubusercontent.com/gpt-cmdr/ras-commander-plugin/{branch}/"
+    marketplace = fetch_json(f"{base}.claude-plugin/marketplace.json")
     entry = next(p for p in marketplace["plugins"] if p.get("name") == PLUGIN)
     if entry.get("version"):
         return entry["version"]
     source = str(entry["source"]).lstrip("./").rstrip("/")
-    return fetch_json(f"{RAW_BASE}{source}/.claude-plugin/plugin.json").get("version")
+    return fetch_json(f"{base}{source}/.claude-plugin/plugin.json").get("version")
 
 
 def refresh(data_dir: str, plugin_root: str) -> None:
@@ -179,14 +187,15 @@ def refresh(data_dir: str, plugin_root: str) -> None:
             packages.append({"name": name, "server": server,
                              "cached": cached.get(name), "latest": latest})
     try:
-        plugin_latest = latest_plugin_version()
+        plugin_latest = latest_plugin_version(channel(plugin_root))
     except Exception:
         plugin_latest = None
     write_json(os.path.join(data_dir, CACHE_NAME), {
         "schema": 1,
         "checked_at": time.time(),
         "packages": packages,
-        "plugin": {"installed": local_plugin_version(plugin_root), "latest": plugin_latest},
+        "plugin": {"installed": local_plugin_version(plugin_root), "latest": plugin_latest,
+                   "channel": channel(plugin_root)},
     })
 
 

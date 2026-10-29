@@ -1,15 +1,10 @@
-name: Regenerate from library main
-
-# Pins ras-commander and hms-commander to the current head of their tracked
-# branch (main), rebuilds the plugin's skills with each library's own
-# generator, and, when anything changed, validates the result, bumps the plugin
-# patch version, and pushes the commit to main so `claude plugin update` and the
-# session-start update notice pick it up. It never publishes to PyPI or
-# installs anything for users.
+name: Update plugin channels
 
 on:
+  push:
+    branches: [main]
   schedule:
-    # Weekly recovery for missed upstream notifications: Monday, 10:23 UTC.
+    # Weekly recovery for missed notifications: Monday, 10:23 UTC.
     - cron: "23 10 * * 1"
   workflow_dispatch:
   repository_dispatch:
@@ -23,30 +18,42 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  channels:
+    runs-on: ubuntu-latest
+    outputs:
+      channels: ${{ steps.choose.outputs.channels }}
+    steps:
+      - id: choose
+        env:
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          if [ "$EVENT" = push ] || [ "$ACTION" = library-main-updated ]; then
+            echo 'channels=["latest"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'channels=["release","latest"]' >> "$GITHUB_OUTPUT"
+          fi
   regenerate:
+    needs: channels
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        channel: ${{ fromJSON(needs.channels.outputs.channels) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Regenerate from the head of each library's main
-        id: build
-        run: python tools/build_content.py --latest --bump-on-change
-      - name: Validate regenerated plugin
-        if: steps.build.outputs.changed == 'true'
-        run: |
-          python tools/validate.py
-          python tools/build_content.py --check
-      - name: Commit and push to main
-        if: steps.build.outputs.changed == 'true'
+      - name: Configure commit identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          version=$(python -c "import json; print(json.load(open('plugins/ras-commander/.claude-plugin/plugin.json'))['version'])")
-          commits=$(python -c "import json; print(', '.join(f\"{l['id']}@{l['commit'][:7]}\" for l in json.load(open('build/sources.json'))['libraries']))")
-          git add -A
-          git commit -m "Regenerate skills from library main (plugin $version)" -m "Sources: $commits"
-          git push origin HEAD:main
+      - name: Build, validate, and publish channel
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/update_channel.py --channel ${{ matrix.channel }} --publish

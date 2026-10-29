@@ -3,22 +3,25 @@
   "repository": "https://github.com/gpt-cmdr/hms-commander",
   "pypi_package": "hms-commander",
   "mcp_package": "hms-commander-mcp",
-  "ref": "main",
-  "commit": "6ae3f61340e60ddd8b5b4c9bb9b1790147a56630",
+  "ref": "v0.4.0",
+  "commit": "3b80c198af0a2949dd66d6a680aa6fd1e38f0fc3",
   "generator": {
     "path": "scripts/agent_framework/build_plugin.py",
-    "sha256": "e745a5edb91a3b02b5dd3fa273bcb84c55b7508852bff9be4eb510c5bf6c86e3"
+    "sha256": "e745a5edb91a3b02b5dd3fa273bcb84c55b7508852bff9be4eb510c5bf6c86e3",
+    "commit": "6ae3f61340e60ddd8b5b4c9bb9b1790147a56630"
   },
-  "package_json_sha256": "8e24bd3d9a03d774d5dfc79af4b28f19b7afd48302ff5654e49c30b61c936db7",
+  "package_json_sha256": "3f172f70bb3bc174609b4b4fa713170b7cdd5b8ae1daff419a3b3e075c4a53a3",
   "selection": {
     "library_default": [
       "hms-commander",
       "hms-ras-integration",
-      "hms-cloud-native-gis",
-      "hms-commander-contributing"
+      "hms-cloud-native-gis"
     ],
     "contribution_slot": [],
-    "contribution_sources": []
+    "contribution_sources": [],
+    "unavailable_in_release": [
+      "hms-commander-contributing"
+    ]
   },
   "generated_manifest": {
     "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
@@ -35,37 +38,25 @@
   },
   "source_provenance": {
     "source_repository": "https://github.com/gpt-cmdr/hms-commander",
-    "package_configuration_sha256": "8e24bd3d9a03d774d5dfc79af4b28f19b7afd48302ff5654e49c30b61c936db7",
+    "package_configuration_sha256": "3f172f70bb3bc174609b4b4fa713170b7cdd5b8ae1daff419a3b3e075c4a53a3",
     "files": [
       {
         "source": ".claude/skills/hms-cloud-native-gis/SKILL.md",
-        "source_sha256": "88dbe620ccb6a7fdb1ac0e8e6a4d9b4887adefce5431acfeae663ff19913ee21",
+        "source_sha256": "d7c6e5c3b558f983c09db6bc27dbb9134675c0efd6571815db8232922f261f3c",
         "packaged": "skills/hms-cloud-native-gis/SKILL.md",
-        "packaged_sha256": "bd8949d2f681d391fae2eef6a9e0453e50800c6b09031e091b3b15a544a8a90d"
-      },
-      {
-        "source": ".claude/skills/hms-commander-contributing/SKILL.md",
-        "source_sha256": "d263824d6a547bc893f5eea0054b9cee160d6aafc4178ff9866bf2b70cbe206d",
-        "packaged": "skills/hms-commander-contributing/SKILL.md",
-        "packaged_sha256": "c23ea27c5d41321ac99e4e36a7a28a86cdada805acc9259f5ec7ce18e5a7b444"
-      },
-      {
-        "source": ".claude/skills/hms-commander-contributing/references/contribution-checks.md",
-        "source_sha256": "25656b87b9ed591853e15fbf0b1b9f0dc9163b678c7b7f0040a6b02dd7f407fa",
-        "packaged": "skills/hms-commander-contributing/references/contribution-checks.md",
-        "packaged_sha256": "25656b87b9ed591853e15fbf0b1b9f0dc9163b678c7b7f0040a6b02dd7f407fa"
+        "packaged_sha256": "74727d6c3279576027791aac3da6647671d9479285a95523f723617a3bc49676"
       },
       {
         "source": ".claude/skills/hms-commander/SKILL.md",
-        "source_sha256": "b2dc1e6494f87697ecee94fbfcf5682b525df58ec28e041118524d2d4b55bb7c",
+        "source_sha256": "5819588ebe11443d85f44528121036a326d31f182675b36e227b273b4bfe4632",
         "packaged": "skills/hms-commander/SKILL.md",
-        "packaged_sha256": "bc561ed5389acc604ce7fa916e315da3db6545db50e450d313887d249381b887"
+        "packaged_sha256": "ff396b462e101d5e6b66bc7dce18c16360e98ffb0d3ade05810b8e4dcbb0c2b5"
       },
       {
         "source": ".claude/skills/hms-ras-integration/SKILL.md",
-        "source_sha256": "9a859b8030e93ed965ba5b602b4e1b4f5ddb9bfc15c41c4412e4d2ff86d90de2",
+        "source_sha256": "000b7d8519d1f108e152ef66f4b3169ec32ca03cf9ab7cfa1a5a8433a41d39e4",
         "packaged": "skills/hms-ras-integration/SKILL.md",
-        "packaged_sha256": "21124382f4d8da9884447904129f941d81f0101c457b9207f1b9f012681adbfa"
+        "packaged_sha256": "ca0a81c3a31c6e8a5f3f14c4b38978869820c029e660dc1d8e1d54ccd4175aab"
       }
     ]
   }
