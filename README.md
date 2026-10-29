@@ -164,6 +164,35 @@ claude plugin update ras-commander@ras-commander-plugin
 
 Restart Claude Code to apply the update.
 
+### Update the Python environment for HDF extraction and mapping
+
+The plugin's skills use stable PyPI releases in the agent's Python environment.
+Updating the plugin or its text MCP servers does not upgrade that environment.
+For a new task environment, use:
+
+```sh
+uv venv
+uv pip install "ras-commander[full]>=0.110.2"
+```
+
+For an existing environment, agree to the upgrade with its owner, activate the
+intended environment, and run:
+
+```sh
+uv pip install --upgrade "ras-commander[full]>=0.110.2"
+```
+
+Preserve project pins unless their owner authorizes a change. Inspect installed
+signatures and capabilities when a skill describes an API that is present on
+`main` but not yet released to PyPI.
+
+Release 0.110.2 includes the Rust HDF engine, `ras-commander-fast-hdf`, as a
+base dependency on supported CPython platforms: Windows x64, Linux x64, and
+macOS arm64. The `[full]` extra includes the Rust mapping engine,
+`ras-commander-fast-map`, on Windows x64 and Linux x64; no macOS mapping wheel
+is available. HDF extraction and mapping use the Python APIs. The text MCP
+servers do not perform either operation.
+
 ## Limitations
 
 - **Tool names appear in the main session.** Claude Code registers a plugin's
@@ -257,6 +286,52 @@ Notifications trigger builds promptly; the weekly check is a recovery mechanism.
 Only actual skill/resource changes produce releases, so library code-only pushes
 do not create empty plugin versions. GitHub schedules may start later than the
 configured time.
+
+### Dispatch token renewal
+
+Configured October 29, 2026: the fine-grained `commander-plugin-dispatch` token
+is stored as the Actions secret `PLUGIN_DISPATCH_TOKEN` in both
+`gpt-cmdr/ras-commander` and `gpt-cmdr/hms-commander`. Its only selected
+repository is `gpt-cmdr/ras-commander-plugin`, with Contents read/write and
+required Metadata read access, and no account permissions. It expires
+**November 28, 2026**.
+
+Before expiry:
+
+1. Create a replacement fine-grained token with the same repository and
+   permissions. Keep its value out of source files, issues, and logs.
+2. Replace `PLUGIN_DISPATCH_TOKEN` under **Settings → Secrets and variables →
+   Actions** in both library repositories.
+3. Run **Notify Commander plugin** (`notify-commander-plugin.yml`) manually
+   in each library, or rerun a failed notification job. Confirm that both
+   notifications and their resulting **Regenerate from library main** runs
+   succeed. Unchanged packaged content should produce no plugin release.
+4. Revoke the previous token after both replacement credentials are verified.
+   Record the replacement's expiry here.
+
+The weekly Monday recovery job uses this repository's own `GITHUB_TOKEN` and
+continues if the upstream token expires. Push-triggered updates resume after
+the upstream secrets are replaced and a notification succeeds.
+
+### Verified rollout, October 29, 2026
+
+Plugin 0.1.2 shipped the regenerated skills and setup guidance for
+ras-commander 0.110.2 or newer. The upstream generators now handle UTF-8 and LF
+directly, so the marketplace's newline monkeypatch has been removed. Structure
+and provenance checks, Linux regeneration, and script tests on Windows, macOS,
+and Linux passed.
+
+Both upstream push notifications succeeded with the configured secret. The
+[RAS-triggered rebuild](https://github.com/gpt-cmdr/ras-commander-plugin/actions/runs/40888556421)
+and [HMS-triggered rebuild](https://github.com/gpt-cmdr/ras-commander-plugin/actions/runs/40888557419)
+found no changed skills or resources and correctly kept version 0.1.2.
+
+A fresh Windows CPython 3.11 installation of
+`ras-commander[full]==0.110.2` included fast-hdf 0.2.4 and fast-map 0.10.1.
+Imports of RAS Commander and the HDF extension passed, as did dependency
+consistency checks. This check did not run HDF extraction, mapping, or a hydraulic model.
+The MCP lock, compatibility snapshot, and setup documentation were also
+[refreshed](https://github.com/gpt-cmdr/ras-commander-mcp/pull/16).
 
 ## License
 
