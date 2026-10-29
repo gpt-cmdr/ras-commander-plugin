@@ -35,8 +35,8 @@ claude plugin marketplace add gpt-cmdr/ras-commander-plugin
 claude plugin install ras-commander@ras-commander-plugin
 ```
 
-The shell install prints `1 userConfig option not yet set â€” run /plugin
-configure â€¦ or pass --config KEY=VALUE.` This is expected and can be ignored: it
+The shell install prints `1 userConfig option not yet set — run /plugin
+configure … or pass --config KEY=VALUE.` This is expected and can be ignored: it
 refers to the optional `extra_roots` setting described in
 [Allowed project roots](#allowed-project-roots). Claude Code prints it for every
 unset option, including optional ones with a default.
@@ -82,7 +82,7 @@ You can also set it later from the command line:
 echo '{"extra_roots": "/data/models"}' | claude plugin configure ras-commander@ras-commander-plugin --values-stdin
 ```
 
-Or use `/plugin` â†’ `ras-commander` â†’ *Configure options* inside Claude Code. Separate paths with `;` on Windows or `:` on macOS and Linux, or
+Or use `/plugin` → `ras-commander` → *Configure options* inside Claude Code. Separate paths with `;` on Windows or `:` on macOS and Linux, or
 enter a JSON array. Paths that do not exist are skipped. A path that contains
 the system temporary directory is also skipped, because the servers refuse
 such roots.
@@ -347,7 +347,7 @@ Before expiry:
 
 1. Create a replacement fine-grained token with the same repository and
    permissions. Keep its value out of source files, issues, and logs.
-2. Replace `PLUGIN_DISPATCH_TOKEN` under **Settings â†’ Secrets and variables â†’
+2. Replace `PLUGIN_DISPATCH_TOKEN` under **Settings → Secrets and variables →
    Actions** in both library repositories.
 3. Run **Notify Commander plugin** (`notify-commander-plugin.yml`) manually
    in each library, or rerun a failed notification job. Confirm that both
