@@ -4,11 +4,11 @@
   "pypi_package": "hms-commander",
   "mcp_package": "hms-commander-mcp",
   "ref": "main",
-  "commit": "961501561ce5fd9757938aafe726dfc6e14d84f5",
+  "commit": "3c0e854d5bf0cc2e75d985557782d6647d21c0db",
   "generator": {
     "path": "scripts/agent_framework/build_plugin.py",
     "sha256": "e745a5edb91a3b02b5dd3fa273bcb84c55b7508852bff9be4eb510c5bf6c86e3",
-    "commit": "961501561ce5fd9757938aafe726dfc6e14d84f5"
+    "commit": "3c0e854d5bf0cc2e75d985557782d6647d21c0db"
   },
   "package_json_sha256": "8e24bd3d9a03d774d5dfc79af4b28f19b7afd48302ff5654e49c30b61c936db7",
   "selection": {

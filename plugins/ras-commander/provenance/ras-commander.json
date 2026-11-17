@@ -4,19 +4,29 @@
   "pypi_package": "ras-commander",
   "mcp_package": "ras-commander-mcp",
   "ref": "main",
-  "commit": "4cb8cacd7ed7df5d23415e3ae9fbac797b40f865",
+  "commit": "7693f655f81debf5b37665836b3ca55161694046",
   "generator": {
     "path": "scripts/agent_framework/build_plugin.py",
     "sha256": "e745a5edb91a3b02b5dd3fa273bcb84c55b7508852bff9be4eb510c5bf6c86e3",
-    "commit": "4cb8cacd7ed7df5d23415e3ae9fbac797b40f865"
+    "commit": "7693f655f81debf5b37665836b3ca55161694046"
   },
-  "package_json_sha256": "ed746e99f316828cb8970f685f54079286cdeb7d2cc65cd1ef38c7fa911d94a2",
+  "package_json_sha256": "5b56bdb90d610e4b015d04671641bb077b0ae99d0abd86256d08c22adb10ba8a",
   "selection": {
     "library_default": [
       "ras-commander",
       "cloud-native-gis",
       "ras-api-discovery",
-      "ras-commander-contributing"
+      "ras-commander-contributing",
+      "ras-boundary-conditions",
+      "ras-meteorological-forcings",
+      "ras-gridded-precipitation",
+      "ras-mapping",
+      "ras-land-surface",
+      "ras-cloud-native-export",
+      "flood-science-research",
+      "ras-terrain",
+      "ras-hms-integration",
+      "ras-consequences"
     ],
     "contribution_slot": [],
     "contribution_sources": [],
@@ -25,8 +35,8 @@
   "generated_manifest": {
     "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
     "name": "ras-commander",
-    "version": "0.1.1",
-    "description": "Coordinate HEC-RAS, API discovery, and cloud-native GIS workflows through current public packages.",
+    "version": "0.2.0",
+    "description": "Coordinate HEC-RAS capabilities, HMS handoffs, cloud-native maps, consequences, and durable adversarial flood-science research through shared workflows.",
     "author": {
       "name": "gpt-cmdr",
       "url": "https://github.com/gpt-cmdr"
@@ -37,19 +47,73 @@
   },
   "source_provenance": {
     "source_repository": "https://github.com/gpt-cmdr/ras-commander",
-    "package_configuration_sha256": "ed746e99f316828cb8970f685f54079286cdeb7d2cc65cd1ef38c7fa911d94a2",
+    "package_configuration_sha256": "5b56bdb90d610e4b015d04671641bb077b0ae99d0abd86256d08c22adb10ba8a",
     "files": [
       {
+        "source": ".claude/references/model-revisions/specification.md",
+        "source_sha256": "1387bbacf648ab82a91230372db10775495fbe0d30ea93948fabc431a2dfa3cf",
+        "packaged": "resources/.claude/references/model-revisions/specification.md",
+        "packaged_sha256": "1387bbacf648ab82a91230372db10775495fbe0d30ea93948fabc431a2dfa3cf"
+      },
+      {
         "source": ".claude/skills/cloud-native-gis/SKILL.md",
-        "source_sha256": "08f83be44b4b30a10a973f9a76f60376133651f753efc9c4d92b14836b4e70d3",
+        "source_sha256": "00ad3ecd61e8cb3d616f96e3061d631b71705771dceceacf508ffba829c0bd50",
         "packaged": "skills/cloud-native-gis/SKILL.md",
-        "packaged_sha256": "a14913c972e1cf0936559522e6aa7e008889579bd385ecfd89c8fd31f64395a9"
+        "packaged_sha256": "969d2ac490b6a1235708c1193b8d0898cef9db3893455eca9e66e2b3559a5244"
+      },
+      {
+        "source": ".claude/skills/flood-science-research/SKILL.md",
+        "source_sha256": "1c739cc358ff0a3a3db7115f59e904a717ce524ff490f0912f02b7e55ee16606",
+        "packaged": "skills/flood-science-research/SKILL.md",
+        "packaged_sha256": "9b6bcdfe482dddee56ce1e55284c900663d1f6a400fb91eb2cabacb2dafe4c1a"
+      },
+      {
+        "source": ".claude/skills/flood-science-research/references/adversarial-review.md",
+        "source_sha256": "81ebd4a7a1258b26f9eb2f06d285e46ddcd710ca65b809b370dc65de12462b1c",
+        "packaged": "skills/flood-science-research/references/adversarial-review.md",
+        "packaged_sha256": "81ebd4a7a1258b26f9eb2f06d285e46ddcd710ca65b809b370dc65de12462b1c"
+      },
+      {
+        "source": ".claude/skills/flood-science-research/references/study-examples.md",
+        "source_sha256": "85d20bf4a4e263ee5206269ce5a1932d2855ed9b787825d5f8ddf702a5888965",
+        "packaged": "skills/flood-science-research/references/study-examples.md",
+        "packaged_sha256": "85d20bf4a4e263ee5206269ce5a1932d2855ed9b787825d5f8ddf702a5888965"
+      },
+      {
+        "source": ".claude/skills/flood-science-research/references/task-template.md",
+        "source_sha256": "5e1b570aa024bab4bbe873eed75e0318ba606a9978ef9bb0c5f11acf2f207853",
+        "packaged": "skills/flood-science-research/references/task-template.md",
+        "packaged_sha256": "5e1b570aa024bab4bbe873eed75e0318ba606a9978ef9bb0c5f11acf2f207853"
       },
       {
         "source": ".claude/skills/ras-api-discovery/SKILL.md",
         "source_sha256": "dde347593938a60b246037c96001f6ee323821f5503ef0544867558454fe2561",
         "packaged": "skills/ras-api-discovery/SKILL.md",
         "packaged_sha256": "56cb77de948fbb1dda33196b2ea09fb7dd0547c8be64774eeed0c5cea361146e"
+      },
+      {
+        "source": ".claude/skills/ras-boundary-conditions/SKILL.md",
+        "source_sha256": "e0b0e041970cf5fdd3c6c5a23f25344e1600cb2f2141183daa2c8c080f4e733b",
+        "packaged": "skills/ras-boundary-conditions/SKILL.md",
+        "packaged_sha256": "a2dbbeb373ef6db04ea337b5eb37e396e917cfd81ad63cb203d5ec5872e2d70e"
+      },
+      {
+        "source": ".claude/skills/ras-boundary-conditions/references/workflow-evidence.md",
+        "source_sha256": "c60a55a964be4cdf7a4dde4fe42039e4f6339cba1daee806f9f45bd749328747",
+        "packaged": "skills/ras-boundary-conditions/references/workflow-evidence.md",
+        "packaged_sha256": "c60a55a964be4cdf7a4dde4fe42039e4f6339cba1daee806f9f45bd749328747"
+      },
+      {
+        "source": ".claude/skills/ras-cloud-native-export/SKILL.md",
+        "source_sha256": "fe1feb030f5d7ab6b18c5af2541a11b32c9509ea5795f44be340ba4e8a7c96ec",
+        "packaged": "skills/ras-cloud-native-export/SKILL.md",
+        "packaged_sha256": "78b466e4db45469ce1327bd67f17a7a89983aa93fab1aabed75a43f7d47d15e5"
+      },
+      {
+        "source": ".claude/skills/ras-cloud-native-export/references/workflows.md",
+        "source_sha256": "4a9bb4ff5de8d1997d66b2ea4122f69fae184eb89a7ae2ef36c043c6242b52d6",
+        "packaged": "skills/ras-cloud-native-export/references/workflows.md",
+        "packaged_sha256": "4a9bb4ff5de8d1997d66b2ea4122f69fae184eb89a7ae2ef36c043c6242b52d6"
       },
       {
         "source": ".claude/skills/ras-commander-contributing/SKILL.md",
@@ -65,9 +129,93 @@
       },
       {
         "source": ".claude/skills/ras-commander/SKILL.md",
-        "source_sha256": "2954b6353e89d7bdc9acb782897e71e88391ca0c44e5434af5cb0650c1d77ca1",
+        "source_sha256": "5b4ab25213f7a492a715cfde00d968b81dcf746b5e3fbb70723c55d28bc5edc0",
         "packaged": "skills/ras-commander/SKILL.md",
-        "packaged_sha256": "f3fdfa85ddaa8171bb91f98337ad5a10058080d9aacae935feb2fe803603f35b"
+        "packaged_sha256": "81d087efc438deb35a7527c2a9ddee4f6da102c2befcac160b0bb1687af8aec9"
+      },
+      {
+        "source": ".claude/skills/ras-consequences/SKILL.md",
+        "source_sha256": "2b0c9658149d1787e02ea77f9e6c99bae5ced18a027ed73a81ed896981382e7c",
+        "packaged": "skills/ras-consequences/SKILL.md",
+        "packaged_sha256": "883e96653a1c50b95107d2f42cdae1b1132e1bd2326ab29b98f42996a150fe93"
+      },
+      {
+        "source": ".claude/skills/ras-consequences/references/method-evidence.md",
+        "source_sha256": "8f5475cc5173b1b00423439a7f03c0b922552bd0c188977f53a30bdf21174345",
+        "packaged": "skills/ras-consequences/references/method-evidence.md",
+        "packaged_sha256": "8f5475cc5173b1b00423439a7f03c0b922552bd0c188977f53a30bdf21174345"
+      },
+      {
+        "source": ".claude/skills/ras-gridded-precipitation/SKILL.md",
+        "source_sha256": "59e2f49084f9e668b3c212e8830cec66ac558dd1272c0f8fa764065a2366aa88",
+        "packaged": "skills/ras-gridded-precipitation/SKILL.md",
+        "packaged_sha256": "fd7542e3be171daa9cd66965eeb163346f36a4dcc7b897963944c98de480f6f7"
+      },
+      {
+        "source": ".claude/skills/ras-gridded-precipitation/references/workflow-evidence.md",
+        "source_sha256": "b676dc02db5cbf634db885eab9d92c1648347816ed8488ae33f66154e045fe07",
+        "packaged": "skills/ras-gridded-precipitation/references/workflow-evidence.md",
+        "packaged_sha256": "b676dc02db5cbf634db885eab9d92c1648347816ed8488ae33f66154e045fe07"
+      },
+      {
+        "source": ".claude/skills/ras-hms-integration/SKILL.md",
+        "source_sha256": "6be27294513331468dd73171a55a2807a066f81e4e18e60cc8fe6e6154e4cfa8",
+        "packaged": "skills/ras-hms-integration/SKILL.md",
+        "packaged_sha256": "9ca377c0f853e4a6aced7c517f099ee9fe278bc9ab853d0914fdad903c9dc6b6"
+      },
+      {
+        "source": ".claude/skills/ras-hms-integration/references/handoff-evidence.md",
+        "source_sha256": "d3665e1179507c8a345a669d6d77674d6155f8ea3d7fd7362683b4c3cbf4c040",
+        "packaged": "skills/ras-hms-integration/references/handoff-evidence.md",
+        "packaged_sha256": "d3665e1179507c8a345a669d6d77674d6155f8ea3d7fd7362683b4c3cbf4c040"
+      },
+      {
+        "source": ".claude/skills/ras-land-surface/SKILL.md",
+        "source_sha256": "39aa21766ca30ec55fa34f4ff39da3f4933539979bbaf1de7f3d41716945f234",
+        "packaged": "skills/ras-land-surface/SKILL.md",
+        "packaged_sha256": "422eb8cd231144b32aebc3b97a8a5da10623c17c245adc0bb63a8809a6cdf0f4"
+      },
+      {
+        "source": ".claude/skills/ras-land-surface/references/workflows.md",
+        "source_sha256": "fba613b7f9d8268e148a22b1ad9c74f672bf81fa80b7ee87af53f4453e4536e3",
+        "packaged": "skills/ras-land-surface/references/workflows.md",
+        "packaged_sha256": "fba613b7f9d8268e148a22b1ad9c74f672bf81fa80b7ee87af53f4453e4536e3"
+      },
+      {
+        "source": ".claude/skills/ras-mapping/SKILL.md",
+        "source_sha256": "6c2bbb8732c5532b870bcd7a699cb90d7bac0a2b10b09b4c6a99972e0239616d",
+        "packaged": "skills/ras-mapping/SKILL.md",
+        "packaged_sha256": "7fb7d3c94b242deeee5ac259765b3c5c90264da5fe8424b008a81ed4b541aeb9"
+      },
+      {
+        "source": ".claude/skills/ras-mapping/references/workflows.md",
+        "source_sha256": "d798ecd2ba764ea3fc6fc6dcb2c0d069b6a3a244ecefa0c5d2cb7a2bc44e82a6",
+        "packaged": "skills/ras-mapping/references/workflows.md",
+        "packaged_sha256": "d798ecd2ba764ea3fc6fc6dcb2c0d069b6a3a244ecefa0c5d2cb7a2bc44e82a6"
+      },
+      {
+        "source": ".claude/skills/ras-meteorological-forcings/SKILL.md",
+        "source_sha256": "e11cc4a9486a50f7ac460beb6944f01690c92d89347ad95632fe55710367279e",
+        "packaged": "skills/ras-meteorological-forcings/SKILL.md",
+        "packaged_sha256": "1ffaef97a41d43e673a13b06a2b4fe40945028c44ac94df35c0cf9bebc59e9bd"
+      },
+      {
+        "source": ".claude/skills/ras-meteorological-forcings/references/workflow-evidence.md",
+        "source_sha256": "9719bdbf550195c9e755e801914c45d9300c10385b4f8e4ea3c324920e68760a",
+        "packaged": "skills/ras-meteorological-forcings/references/workflow-evidence.md",
+        "packaged_sha256": "9719bdbf550195c9e755e801914c45d9300c10385b4f8e4ea3c324920e68760a"
+      },
+      {
+        "source": ".claude/skills/ras-terrain/SKILL.md",
+        "source_sha256": "ad1c76a54ec728e495257cede349ee949d7fd7bc265f9dc9aea44920fe9d1f1f",
+        "packaged": "skills/ras-terrain/SKILL.md",
+        "packaged_sha256": "7f71e982439e9f6a8b849ff1848de4fb7c12b96d658fbe21d9ad96892701f713"
+      },
+      {
+        "source": ".claude/skills/ras-terrain/references/workflows.md",
+        "source_sha256": "d96e36449368d0dddae4ed01844b03cee99575706013d2893cb8e5647a4ec9fb",
+        "packaged": "skills/ras-terrain/references/workflows.md",
+        "packaged_sha256": "d96e36449368d0dddae4ed01844b03cee99575706013d2893cb8e5647a4ec9fb"
       }
     ]
   }
